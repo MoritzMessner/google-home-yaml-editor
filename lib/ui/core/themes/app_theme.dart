@@ -1,0 +1,119 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+/// App theme with a clean, functional dark aesthetic
+class AppTheme {
+  static const _background = Color(0xFF1E1E2E);
+  static const _surface = Color(0xFF2D2D3D);
+  static const _surfaceVariant = Color(0xFF3D3D4D);
+  static const _primary = Color(0xFF89B4FA);
+  static const _secondary = Color(0xFFA6E3A1);
+  static const _error = Color(0xFFF38BA8);
+  static const _warning = Color(0xFFFAB387);
+  static const _text = Color(0xFFCDD6F4);
+  static const _textMuted = Color(0xFF9399B2);
+
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: _background,
+      colorScheme: const ColorScheme.dark(
+        surface: _background,
+        primary: _primary,
+        secondary: _secondary,
+        error: _error,
+        onSurface: _text,
+        onPrimary: _background,
+        onSecondary: _background,
+        onError: _background,
+        surfaceContainerHighest: _surfaceVariant,
+      ),
+      textTheme: GoogleFonts.jetBrainsMonoTextTheme(
+        ThemeData.dark().textTheme,
+      ).apply(
+        bodyColor: _text,
+        displayColor: _text,
+      ),
+      cardTheme: CardThemeData(
+        color: _surface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: _surfaceVariant.withValues(alpha: 0.5)),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: _surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: BorderSide(color: _surfaceVariant),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: BorderSide(color: _surfaceVariant),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: const BorderSide(color: _primary, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        labelStyle: const TextStyle(color: _textMuted),
+        hintStyle: const TextStyle(color: _textMuted),
+      ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: _surface,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: BorderSide(color: _surfaceVariant),
+          ),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _primary,
+          foregroundColor: _background,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: _primary,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: _textMuted,
+        ),
+      ),
+      dividerTheme: const DividerThemeData(
+        color: _surfaceVariant,
+        thickness: 1,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: _surface,
+        elevation: 0,
+        titleTextStyle: GoogleFonts.jetBrainsMono(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: _text,
+        ),
+        iconTheme: const IconThemeData(color: _text),
+      ),
+    );
+  }
+
+  // Semantic colors for the editor
+  static const Color starterColor = Color(0xFF89DCEB);
+  static const Color conditionColor = _warning;
+  static const Color actionColor = _secondary;
+  static const Color metadataColor = _primary;
+}
+
