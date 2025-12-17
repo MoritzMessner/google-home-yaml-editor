@@ -50,7 +50,7 @@ class EditorViewModel extends ChangeNotifier {
     final automations = List<Automation>.from(_script.automations);
     final automation = automations[automationIndex];
     final starters = List<Starter>.from(automation.starters);
-    starters.add(const OkGoogleStarter(''));
+    starters.add(const OkGoogleStarter());
     automations[automationIndex] = automation.copyWith(starters: starters);
     _script = _script.copyWith(automations: automations);
     notifyListeners();
@@ -161,4 +161,6 @@ class EditorViewModel extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+
 
