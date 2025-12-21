@@ -34,20 +34,34 @@ class MetadataCard extends StatelessWidget {
             TextFormField(
               initialValue: name,
               decoration: const InputDecoration(
-                labelText: 'Name',
+                labelText: 'Name *',
                 isDense: true,
               ),
               onChanged: onNameChanged,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Name is required';
+                }
+                return null;
+              },
+              autovalidateMode: AutovalidateMode.onUserInteraction,
             ),
             const SizedBox(height: 12),
             TextFormField(
               initialValue: description,
               decoration: const InputDecoration(
-                labelText: 'Description',
+                labelText: 'Description *',
                 isDense: true,
               ),
               maxLines: 2,
               onChanged: onDescriptionChanged,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Description is required';
+                }
+                return null;
+              },
+              autovalidateMode: AutovalidateMode.onUserInteraction,
             ),
           ],
         ),
@@ -55,4 +69,6 @@ class MetadataCard extends StatelessWidget {
     );
   }
 }
+
+
 
