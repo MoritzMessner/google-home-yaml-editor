@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import '../view_model/editor_view_model.dart';
 import 'visual_editor/visual_editor.dart';
 import 'yaml_preview/yaml_preview.dart';
@@ -37,6 +40,17 @@ class _EditorScreenContent extends StatelessWidget {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const FaIcon(FontAwesomeIcons.github, size: 20),
+            tooltip: 'View on GitHub',
+            onPressed: () {
+              launchUrl(
+                Uri.parse(
+                    'https://github.com/MoritzMessner/google-home-yaml-editor'),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
           TextButton.icon(
             onPressed: () => _showImportDialog(context),
             icon: const Icon(Icons.upload_file, size: 18),
@@ -149,7 +163,8 @@ class _EditorScreenContent extends StatelessWidget {
                 if (!success) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Failed to parse YAML. Please check the format.'),
+                      content: Text(
+                          'Failed to parse YAML. Please check the format.'),
                       backgroundColor: Color(0xFFF38BA8),
                     ),
                   );
@@ -170,6 +185,3 @@ class _EditorScreenContent extends StatelessWidget {
     );
   }
 }
-
-
-

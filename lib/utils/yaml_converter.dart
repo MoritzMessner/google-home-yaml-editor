@@ -2,6 +2,7 @@ import 'package:yaml/yaml.dart';
 
 import '../domain/models/automation.dart';
 import '../domain/models/condition.dart';
+import '../domain/models/starter.dart';
 
 /// Converts between AutomationScript and YAML format
 class YamlConverter {
@@ -13,8 +14,8 @@ class YamlConverter {
 
     // Metadata
     buffer.writeln('metadata:');
-    buffer.writeln('  name: ${_quote(script.metadata.name)}');
-    buffer.writeln('  description: ${_quote(script.metadata.description)}');
+    buffer.writeln('  name: ${script.metadata.name}');
+    buffer.writeln('  description: ${script.metadata.description}');
     buffer.writeln();
 
     // Automations
@@ -118,20 +119,24 @@ class YamlConverter {
       // Assistant events
       case OkGoogleStarter(:final eventData):
         buffer.writeln('      - type: assistant.event.OkGoogle');
-        if (eventData != null) {
-          buffer.writeln('        query: ${_quote(eventData)}');
-        }
+        buffer.writeln('        query: ${_quote(eventData)}');
 
       // Time events
-      case TimeScheduleStarter(:final at):
+      case TimeScheduleStarter(:final at, :final weekdays):
         buffer.writeln('      - type: time.schedule');
         buffer.writeln('        at: $at');
+        if (weekdays != null && weekdays.isNotEmpty) {
+          buffer.writeln('        weekdays:');
+          for (final day in weekdays) {
+            buffer.writeln('          - ${_quote(day.value)}');
+          }
+        }
 
       // Home state
       case HomePresenceStarter(:final state, :final is_):
         buffer.writeln('      - type: home.state.HomePresence');
         buffer.writeln('        state: $state');
-        buffer.writeln('        is: $is_');
+        if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
       // Device events
       case DoorbellPressStarter(:final device):
@@ -179,61 +184,61 @@ class YamlConverter {
         buffer.writeln('      - type: device.state.OnOff');
         buffer.writeln('        device: ${_quote(device)}');
         buffer.writeln('        state: on');
-        buffer.writeln('        is: $is_');
+        if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
       case BrightnessStateStarter(:final device, :final is_):
         buffer.writeln('      - type: device.state.Brightness');
         buffer.writeln('        device: ${_quote(device)}');
         buffer.writeln('        state: brightness');
-        buffer.writeln('        is: $is_');
+        if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
       case LockUnlockStateStarter(:final device, :final is_):
         buffer.writeln('      - type: device.state.LockUnlock');
         buffer.writeln('        device: ${_quote(device)}');
         buffer.writeln('        state: isLocked');
-        buffer.writeln('        is: $is_');
+        if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
       case OpenCloseStateStarter(:final device, :final is_):
         buffer.writeln('      - type: device.state.OpenClose');
         buffer.writeln('        device: ${_quote(device)}');
         buffer.writeln('        state: openPercent');
-        buffer.writeln('        is: $is_');
+        if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
       case TemperatureSettingStarter(:final device, :final state, :final is_):
         buffer.writeln('      - type: device.state.TemperatureSetting');
         buffer.writeln('        device: ${_quote(device)}');
         buffer.writeln('        state: $state');
-        buffer.writeln('        is: $is_');
+        if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
       case MotionDetectionStateStarter(:final device, :final is_):
         buffer.writeln('      - type: device.state.MotionDetection');
         buffer.writeln('        device: ${_quote(device)}');
         buffer.writeln('        state: motionDetected');
-        buffer.writeln('        is: $is_');
+        if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
       case OccupancyStateStarter(:final device, :final is_):
         buffer.writeln('      - type: device.state.OccupancySensing');
         buffer.writeln('        device: ${_quote(device)}');
         buffer.writeln('        state: occupancy');
-        buffer.writeln('        is: $is_');
+        if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
       case EnergyStorageStateStarter(:final device, :final state, :final is_):
         buffer.writeln('      - type: device.state.EnergyStorage');
         buffer.writeln('        device: ${_quote(device)}');
         buffer.writeln('        state: $state');
-        buffer.writeln('        is: $is_');
+        if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
       case TimerStateStarter(:final device, :final state, :final is_):
         buffer.writeln('      - type: device.state.Timer');
         buffer.writeln('        device: ${_quote(device)}');
         buffer.writeln('        state: $state');
-        buffer.writeln('        is: $is_');
+        if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
       case DeviceStateStarter(:final device, :final state, :final is_):
         buffer.writeln('      - type: device.state');
         buffer.writeln('        device: ${_quote(device)}');
         buffer.writeln('        state: $state');
-        buffer.writeln('        is: $is_');
+        if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
     }
   }
 
@@ -241,27 +246,6 @@ class YamlConverter {
       {int indent = 6}) {
     final prefix = ' ' * indent;
     switch (condition) {
-      case AndCondition(:final conditions):
-        buffer.writeln('${prefix}type: and');
-        buffer.writeln('${prefix}conditions:');
-        for (final c in conditions) {
-          buffer.writeln('$prefix  -');
-          _writeCondition(buffer, c, indent: indent + 4);
-        }
-
-      case OrCondition(:final conditions):
-        buffer.writeln('${prefix}type: or');
-        buffer.writeln('${prefix}conditions:');
-        for (final c in conditions) {
-          buffer.writeln('$prefix  -');
-          _writeCondition(buffer, c, indent: indent + 4);
-        }
-
-      case NotCondition(:final condition):
-        buffer.writeln('${prefix}type: not');
-        buffer.writeln('${prefix}condition:');
-        _writeCondition(buffer, condition, indent: indent + 2);
-
       case TimeBetweenCondition(:final after, :final before, :final weekdays):
         buffer.writeln('${prefix}type: time.between');
         if (after != null) buffer.writeln('${prefix}after: $after');
@@ -273,385 +257,130 @@ class YamlConverter {
           }
         }
 
-      case HomePresenceCondition(
-          :final state,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case HomePresenceCondition(:final state, :final is_):
         buffer.writeln('${prefix}type: home.state.HomePresence');
         buffer.writeln('${prefix}state: $state');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case OnOffCondition(
-          :final device,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case OnOffCondition(:final device, :final is_):
         buffer.writeln('${prefix}type: device.state.OnOff');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: on');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case BrightnessCondition(
-          :final device,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case BrightnessCondition(:final device, :final is_):
         buffer.writeln('${prefix}type: device.state.Brightness');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: brightness');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case VolumeCondition(
-          :final device,
-          :final state,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case VolumeCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.Volume');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: $state');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case LockUnlockCondition(
-          :final device,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case LockUnlockCondition(:final device, :final is_):
         buffer.writeln('${prefix}type: device.state.LockUnlock');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: isLocked');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case OpenCloseCondition(
-          :final device,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case OpenCloseCondition(:final device, :final is_):
         buffer.writeln('${prefix}type: device.state.OpenClose');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: openPercent');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case TemperatureSettingCondition(
-          :final device,
-          :final state,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case TemperatureSettingCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.TemperatureSetting');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: $state');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case ArmDisarmCondition(
-          :final device,
-          :final state,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case ArmDisarmCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.ArmDisarm');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: $state');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case DockCondition(
-          :final device,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case DockCondition(:final device, :final is_):
         buffer.writeln('${prefix}type: device.state.Dock');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: isDocked');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case StartStopCondition(
-          :final device,
-          :final state,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case StartStopCondition(:final device, :final is_):
         buffer.writeln('${prefix}type: device.state.StartStop');
         buffer.writeln('${prefix}device: ${_quote(device)}');
-        buffer.writeln('${prefix}state: $state');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        buffer.writeln('${prefix}state: isRunning');
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case FanSpeedCondition(
-          :final device,
-          :final state,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case FanSpeedCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.FanSpeed');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: $state');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case HumiditySettingCondition(
-          :final device,
-          :final state,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case HumiditySettingCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.HumiditySetting');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: $state');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case FillCondition(
-          :final device,
-          :final state,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case FillCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.Fill');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: $state');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case EnergyStorageCondition(
-          :final device,
-          :final state,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case EnergyStorageCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.EnergyStorage');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: $state');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case MotionDetectionCondition(
-          :final device,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case MotionDetectionCondition(:final device, :final is_):
         buffer.writeln('${prefix}type: device.state.MotionDetection');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: motionDetected');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case OccupancySensingCondition(
-          :final device,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case OccupancySensingCondition(:final device, :final is_):
         buffer.writeln('${prefix}type: device.state.OccupancySensing');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: occupancy');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case OnlineCondition(
-          :final device,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case OnlineCondition(:final device, :final is_):
         buffer.writeln('${prefix}type: device.state.Online');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: online');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case TimerCondition(
-          :final device,
-          :final state,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case TimerCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.Timer');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: $state');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case MediaStateCondition(
-          :final device,
-          :final state,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case MediaStateCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.MediaState');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: $state');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case SensorStateCondition(
-          :final device,
-          :final state,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case SensorStateCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.SensorState');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: $state');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case DeviceStateCondition(
-          :final device,
-          :final state,
-          :final is_,
-          :final isNot,
-          :final greaterThan,
-          :final greaterThanOrEqualTo,
-          :final lessThan,
-          :final lessThanOrEqualTo
-        ):
+      case DeviceStateCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: $state');
-        _writeComparisonOperators(
-            buffer, prefix, is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo);
-    }
-  }
-
-  static void _writeComparisonOperators(
-    StringBuffer buffer,
-    String prefix,
-    dynamic is_,
-    dynamic isNot,
-    dynamic greaterThan,
-    dynamic greaterThanOrEqualTo,
-    dynamic lessThan,
-    dynamic lessThanOrEqualTo,
-  ) {
-    String _formatValue(dynamic value) {
-      if (value == null) return '';
-      // Handle enum types by converting to their string value
-      if (value is HomePresenceMode) {
-        return _quote(value.value);
-      }
-      if (value is OccupancyState) {
-        return _quote(value.value);
-      }
-      if (value is PlaybackState) {
-        return _quote(value.value);
-      }
-      if (value is ThermostatMode) {
-        return _quote(value.value);
-      }
-      if (value is EnergyCapacityLevel) {
-        return _quote(value.value);
-      }
-      if (value is String) {
-        return _quote(value);
-      }
-      return value.toString();
-    }
-
-    if (is_ != null) {
-      buffer.writeln('${prefix}is: ${_formatValue(is_)}');
-    }
-    if (isNot != null) {
-      buffer.writeln('${prefix}isNot: ${_formatValue(isNot)}');
-    }
-    if (greaterThan != null) {
-      buffer.writeln('${prefix}greaterThan: ${_formatValue(greaterThan)}');
-    }
-    if (greaterThanOrEqualTo != null) {
-      buffer.writeln('${prefix}greaterThanOrEqualTo: ${_formatValue(greaterThanOrEqualTo)}');
-    }
-    if (lessThan != null) {
-      buffer.writeln('${prefix}lessThan: ${_formatValue(lessThan)}');
-    }
-    if (lessThanOrEqualTo != null) {
-      buffer.writeln('${prefix}lessThanOrEqualTo: ${_formatValue(lessThanOrEqualTo)}');
+        if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
     }
   }
 
@@ -702,23 +431,12 @@ class YamlConverter {
 
       case ColorAbsoluteAction(
           :final devices,
-          :final colorName,
-          :final spectrumHSV,
           :final spectrumRGB,
           :final temperature
         ):
         buffer.writeln('      - type: device.command.ColorAbsolute');
         _writeDevices(buffer, devices);
         buffer.writeln('        color:');
-        if (colorName != null) {
-          buffer.writeln('          name: ${_quote(colorName)}');
-        }
-        if (spectrumHSV != null) {
-          buffer.writeln('          spectrumHSV:');
-          buffer.writeln('            hue: ${spectrumHSV.hue}');
-          buffer.writeln('            saturation: ${spectrumHSV.saturation}');
-          buffer.writeln('            value: ${spectrumHSV.value}');
-        }
         if (spectrumRGB != null) {
           buffer.writeln('          spectrumRGB: $spectrumRGB');
         }
@@ -781,7 +499,11 @@ class YamlConverter {
           buffer.writeln('        cancel: $cancel');
         }
 
-      case OpenCloseAction(:final devices, :final openPercent, :final openDirection):
+      case OpenCloseAction(
+          :final devices,
+          :final openPercent,
+          :final openDirection
+        ):
         buffer.writeln('      - type: device.command.OpenClose');
         _writeDevices(buffer, devices);
         if (openPercent != null) {
@@ -811,8 +533,8 @@ class YamlConverter {
           :final thermostatTemperatureSetpointHigh,
           :final thermostatTemperatureSetpointLow
         ):
-        buffer
-            .writeln('      - type: device.command.ThermostatTemperatureSetRange');
+        buffer.writeln(
+            '      - type: device.command.ThermostatTemperatureSetRange');
         _writeDevices(buffer, devices);
         buffer.writeln(
             '        thermostatTemperatureSetpointHigh: $thermostatTemperatureSetpointHigh');
@@ -861,8 +583,8 @@ class YamlConverter {
               '        relativeHumidityPercent: $relativeHumidityPercent');
         }
         if (relativeHumidityWeight != null) {
-          buffer
-              .writeln('        relativeHumidityWeight: $relativeHumidityWeight');
+          buffer.writeln(
+              '        relativeHumidityWeight: $relativeHumidityWeight');
         }
 
       case StartStopAction(:final devices, :final start):
@@ -1019,7 +741,8 @@ class YamlConverter {
       case AppInstallAction(:final devices, :final newApplicationName):
         buffer.writeln('      - type: device.command.AppInstall');
         _writeDevices(buffer, devices);
-        buffer.writeln('        newApplicationName: ${_quote(newApplicationName)}');
+        buffer.writeln(
+            '        newApplicationName: ${_quote(newApplicationName)}');
 
       case AppSearchAction(:final devices, :final applicationName):
         buffer.writeln('      - type: device.command.AppSearch');
@@ -1073,7 +796,8 @@ class YamlConverter {
         }
 
       case EnableDisableGuestNetworkAction(:final devices, :final enable):
-        buffer.writeln('      - type: device.command.EnableDisableGuestNetwork');
+        buffer
+            .writeln('      - type: device.command.EnableDisableGuestNetwork');
         _writeDevices(buffer, devices);
         buffer.writeln('        enable: $enable');
 
@@ -1082,7 +806,8 @@ class YamlConverter {
           :final enable,
           :final profile
         ):
-        buffer.writeln('      - type: device.command.EnableDisableNetworkProfile');
+        buffer.writeln(
+            '      - type: device.command.EnableDisableNetworkProfile');
         _writeDevices(buffer, devices);
         buffer.writeln('        enable: $enable');
         buffer.writeln('        profile: ${_quote(profile)}');
@@ -1119,6 +844,19 @@ class YamlConverter {
     return value;
   }
 
+  static String _formatValue(dynamic value) {
+    if (value == null) return '';
+    // Handle enum types by converting to their string value
+    if (value is HomePresenceMode) return _quote(value.value);
+    if (value is OccupancyState) return _quote(value.value);
+    if (value is PlaybackState) return _quote(value.value);
+    if (value is ThermostatMode) return _quote(value.value);
+    if (value is EnergyCapacityLevel) return _quote(value.value);
+    if (value is Weekday) return _quote(value.value);
+    if (value is String) return _quote(value);
+    return value.toString();
+  }
+
   // ============================================================================
   // Parsing Helpers
   // ============================================================================
@@ -1132,17 +870,28 @@ class YamlConverter {
     switch (type) {
       // Assistant events
       case 'assistant.event.OkGoogle':
-        return OkGoogleStarter(eventData: yaml['query']?.toString());
+        return OkGoogleStarter(eventData: yaml['query']?.toString() ?? '');
 
       // Time events
       case 'time.schedule':
-        return TimeScheduleStarter(at: yaml['at']?.toString() ?? '8:00 am');
+        final weekdaysYaml = yaml['weekdays'] as YamlList?;
+        List<Weekday>? weekdays;
+        if (weekdaysYaml != null) {
+          weekdays = weekdaysYaml
+              .map((d) => Weekday.fromString(d?.toString()))
+              .whereType<Weekday>()
+              .toList();
+        }
+        return TimeScheduleStarter(
+          at: yaml['at']?.toString() ?? '8:00 am',
+          weekdays: weekdays,
+        );
 
       // Home state
       case 'home.state.HomePresence':
         return HomePresenceStarter(
           state: state.isEmpty ? 'homePresenceMode' : state,
-          is_: isValue?.toString() ?? 'HOME',
+          is_: HomePresenceMode.fromString(isValue?.toString() ?? 'HOME'),
         );
 
       // Device events
@@ -1178,29 +927,44 @@ class YamlConverter {
 
       // Device state changes
       case 'device.state.OnOff':
-        return OnOffStateStarter(device: device, state: state.isEmpty ? 'on' : state, is_: isValue == true);
+        return OnOffStateStarter(
+            device: device,
+            state: state.isEmpty ? 'on' : state,
+            is_: isValue == true);
 
       case 'device.state.Brightness':
         return BrightnessStateStarter(
-            device: device, state: state.isEmpty ? 'brightness' : state, is_: _parseInt(isValue) ?? 100);
+            device: device,
+            state: state.isEmpty ? 'brightness' : state,
+            is_: _parseInt(isValue) ?? 100);
 
       case 'device.state.LockUnlock':
-        return LockUnlockStateStarter(device: device, state: state.isEmpty ? 'isLocked' : state, is_: isValue == true);
+        return LockUnlockStateStarter(
+            device: device,
+            state: state.isEmpty ? 'isLocked' : state,
+            is_: isValue == true);
 
       case 'device.state.OpenClose':
         return OpenCloseStateStarter(
-            device: device, state: state.isEmpty ? 'openPercent' : state, is_: _parseInt(isValue) ?? 100);
+            device: device,
+            state: state.isEmpty ? 'openPercent' : state,
+            is_: _parseInt(isValue) ?? 100);
 
       case 'device.state.TemperatureSetting':
         return TemperatureSettingStarter(
             device: device, state: state, is_: isValue);
 
       case 'device.state.MotionDetection':
-        return MotionDetectionStateStarter(device: device, state: state.isEmpty ? 'motionDetectionEventInProgress' : state, is_: isValue == true);
+        return MotionDetectionStateStarter(
+            device: device,
+            state: state.isEmpty ? 'motionDetectionEventInProgress' : state,
+            is_: isValue == true);
 
       case 'device.state.OccupancySensing':
         return OccupancyStateStarter(
-            device: device, state: state.isEmpty ? 'occupancy' : state, is_: isValue?.toString() ?? 'OCCUPIED');
+            device: device,
+            state: state.isEmpty ? 'occupancy' : state,
+            is_: isValue?.toString() ?? 'OCCUPIED');
 
       case 'device.state.EnergyStorage':
         return EnergyStorageStateStarter(
@@ -1225,36 +989,6 @@ class YamlConverter {
     final isValue = yaml['is'];
 
     switch (type) {
-      case 'and':
-        final conditionsYaml = yaml['conditions'] as YamlList?;
-        final conditions = <Condition>[];
-        if (conditionsYaml != null) {
-          for (final c in conditionsYaml) {
-            final parsed = _parseCondition(c as YamlMap);
-            if (parsed != null) conditions.add(parsed);
-          }
-        }
-        return AndCondition(conditions: conditions);
-
-      case 'or':
-        final conditionsYaml = yaml['conditions'] as YamlList?;
-        final conditions = <Condition>[];
-        if (conditionsYaml != null) {
-          for (final c in conditionsYaml) {
-            final parsed = _parseCondition(c as YamlMap);
-            if (parsed != null) conditions.add(parsed);
-          }
-        }
-        return OrCondition(conditions: conditions);
-
-      case 'not':
-        final conditionYaml = yaml['condition'] as YamlMap?;
-        if (conditionYaml != null) {
-          final parsed = _parseCondition(conditionYaml);
-          if (parsed != null) return NotCondition(condition: parsed);
-        }
-        return null;
-
       case 'time.between':
         final weekdaysYaml = yaml['weekdays'] as YamlList?;
         List<Weekday>? weekdays;
@@ -1277,28 +1011,43 @@ class YamlConverter {
         );
 
       case 'device.state.OnOff':
-        return OnOffCondition(device: device, state: state.isEmpty ? 'on' : state, is_: isValue == true);
+        return OnOffCondition(
+            device: device,
+            state: state.isEmpty ? 'on' : state,
+            is_: isValue == true);
 
       case 'device.state.Brightness':
         return BrightnessCondition(
-            device: device, state: state.isEmpty ? 'brightness' : state, is_: _parseInt(isValue) ?? 100);
+            device: device,
+            state: state.isEmpty ? 'brightness' : state,
+            is_: _parseInt(isValue) ?? 100);
 
       case 'device.state.Volume':
-        return VolumeCondition(device: device, state: state.isEmpty ? 'currentVolume' : state, is_: _parseInt(isValue) ?? 50);
+        return VolumeCondition(
+            device: device,
+            state: state.isEmpty ? 'currentVolume' : state,
+            is_: _parseInt(isValue) ?? 50);
 
       case 'device.state.LockUnlock':
-        return LockUnlockCondition(device: device, state: state.isEmpty ? 'isLocked' : state, is_: isValue == true);
+        return LockUnlockCondition(
+            device: device,
+            state: state.isEmpty ? 'isLocked' : state,
+            is_: isValue == true);
 
       case 'device.state.OpenClose':
         return OpenCloseCondition(
-            device: device, state: state.isEmpty ? 'openPercent' : state, is_: _parseInt(isValue) ?? 100);
+            device: device,
+            state: state.isEmpty ? 'openPercent' : state,
+            is_: _parseInt(isValue) ?? 100);
 
       case 'device.state.TemperatureSetting':
         // Handle thermostatMode as enum, temperature values as double
         dynamic parsedValue = isValue;
         if (state == 'thermostatMode' && isValue != null) {
           parsedValue = ThermostatMode.fromString(isValue.toString());
-        } else if (isValue != null && (state == 'thermostatTemperatureSetpoint' || state == 'thermostatTemperatureAmbient')) {
+        } else if (isValue != null &&
+            (state == 'thermostatTemperatureSetpoint' ||
+                state == 'thermostatTemperatureAmbient')) {
           parsedValue = _parseDouble(isValue);
         }
         return TemperatureSettingCondition(
@@ -1308,10 +1057,16 @@ class YamlConverter {
         return ArmDisarmCondition(device: device, state: state, is_: isValue);
 
       case 'device.state.Dock':
-        return DockCondition(device: device, state: state.isEmpty ? 'isDocked' : state, is_: isValue == true);
+        return DockCondition(
+            device: device,
+            state: state.isEmpty ? 'isDocked' : state,
+            is_: isValue == true);
 
       case 'device.state.StartStop':
-        return StartStopCondition(device: device, state: state.isEmpty ? 'isRunning' : state, is_: isValue == true);
+        return StartStopCondition(
+            device: device,
+            state: state.isEmpty ? 'isRunning' : state,
+            is_: isValue == true);
 
       case 'device.state.FanSpeed':
         return FanSpeedCondition(device: device, state: state, is_: isValue);
@@ -1328,27 +1083,42 @@ class YamlConverter {
         dynamic parsedValue = isValue;
         if (state == 'descriptiveCapacityRemaining' && isValue != null) {
           parsedValue = EnergyCapacityLevel.fromString(isValue.toString());
-        } else if (isValue != null && (state == 'isCharging' || state == 'isPluggedIn')) {
-          parsedValue = isValue == true || isValue.toString().toLowerCase() == 'true';
+        } else if (isValue != null &&
+            (state == 'isCharging' || state == 'isPluggedIn')) {
+          parsedValue =
+              isValue == true || isValue.toString().toLowerCase() == 'true';
         }
         return EnergyStorageCondition(
             device: device, state: state, is_: parsedValue);
 
       case 'device.state.MotionDetection':
-        return MotionDetectionCondition(device: device, state: state.isEmpty ? 'motionDetectionEventInProgress' : state, is_: isValue == true);
+        return MotionDetectionCondition(
+            device: device,
+            state: state.isEmpty ? 'motionDetectionEventInProgress' : state,
+            is_: isValue == true);
 
       case 'device.state.OccupancySensing':
         return OccupancySensingCondition(
-            device: device, state: state.isEmpty ? 'occupancy' : state, is_: OccupancyState.fromString(isValue?.toString() ?? 'OCCUPIED'));
+            device: device,
+            state: state.isEmpty ? 'occupancy' : state,
+            is_: OccupancyState.fromString(isValue?.toString() ?? 'OCCUPIED'));
 
       case 'device.state.Online':
-        return OnlineCondition(device: device, state: state.isEmpty ? 'online' : state, is_: isValue == true);
+        return OnlineCondition(
+            device: device,
+            state: state.isEmpty ? 'online' : state,
+            is_: isValue == true);
 
       case 'device.state.Timer':
         return TimerCondition(device: device, state: state, is_: isValue);
 
       case 'device.state.MediaState':
-        return MediaStateCondition(device: device, state: state, is_: isValue);
+        dynamic parsedValue = isValue;
+        if (state == 'playbackState' && isValue != null) {
+          parsedValue = PlaybackState.fromString(isValue.toString());
+        }
+        return MediaStateCondition(
+            device: device, state: state, is_: parsedValue);
 
       case 'device.state.SensorState':
         return SensorStateCondition(device: device, state: state, is_: isValue);
@@ -1406,19 +1176,8 @@ class YamlConverter {
 
       case 'device.command.ColorAbsolute':
         final colorYaml = yaml['color'] as YamlMap?;
-        SpectrumHSV? hsv;
-        if (colorYaml?['spectrumHSV'] != null) {
-          final hsvYaml = colorYaml!['spectrumHSV'] as YamlMap;
-          hsv = SpectrumHSV(
-            hue: _parseDouble(hsvYaml['hue']) ?? 0,
-            saturation: _parseDouble(hsvYaml['saturation']) ?? 1,
-            value: _parseDouble(hsvYaml['value']) ?? 1,
-          );
-        }
         return ColorAbsoluteAction(
           devices: devices,
-          colorName: colorYaml?['name']?.toString(),
-          spectrumHSV: hsv,
           spectrumRGB: _parseInt(colorYaml?['spectrumRGB']),
           temperature: _parseInt(colorYaml?['temperature']),
         );

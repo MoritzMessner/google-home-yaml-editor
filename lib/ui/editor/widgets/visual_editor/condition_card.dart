@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../domain/models/condition.dart';
 import '../../../core/themes/app_theme.dart';
+import 'weekday_selector.dart';
 
 /// Card for editing the optional condition in an automation
 class ConditionCard extends StatelessWidget {
@@ -48,12 +49,7 @@ class ConditionCard extends StatelessWidget {
                         labelText: 'Condition Type',
                         isDense: true,
                       ),
-                      items: ConditionType.values
-                          .where((t) =>
-                              t != ConditionType.and_ &&
-                              t != ConditionType.or_ &&
-                              t != ConditionType.not_)
-                          .map((type) {
+                      items: ConditionType.values.map((type) {
                         return DropdownMenuItem(
                           value: type,
                           child: Text(
@@ -126,37 +122,35 @@ class ConditionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildConditionFields(BuildContext context, ConditionType conditionType) {
+  Widget _buildConditionFields(
+      BuildContext context, ConditionType conditionType) {
     final c = condition!;
     return KeyedSubtree(
       key: ValueKey('condition_fields_${conditionType.name}'),
       child: switch (c) {
-      AndCondition() => const Text('AND condition (nested not supported yet)'),
-      OrCondition() => const Text('OR condition (nested not supported yet)'),
-      NotCondition() => const Text('NOT condition (nested not supported yet)'),
-      TimeBetweenCondition c => _buildTimeBetweenFields(c),
-      HomePresenceCondition c => _buildHomePresenceFields(c),
-      OnOffCondition c => _buildOnOffFields(c),
-      BrightnessCondition c => _buildBrightnessFields(c),
-      VolumeCondition c => _buildVolumeFields(c),
-      LockUnlockCondition c => _buildLockUnlockFields(c),
-      OpenCloseCondition c => _buildOpenCloseFields(c),
-      TemperatureSettingCondition c => _buildTemperatureSettingFields(c),
-      ArmDisarmCondition c => _buildArmDisarmFields(c),
-      DockCondition c => _buildDockFields(c),
-      StartStopCondition c => _buildStartStopFields(c),
-      FanSpeedCondition c => _buildFanSpeedFields(c),
-      HumiditySettingCondition c => _buildHumiditySettingFields(c),
-      FillCondition c => _buildFillFields(c),
-      EnergyStorageCondition c => _buildEnergyStorageFields(c),
-      MotionDetectionCondition c => _buildMotionDetectionFields(c),
-      OccupancySensingCondition c => _buildOccupancySensingFields(c),
-      OnlineCondition c => _buildOnlineFields(c),
-      TimerCondition c => _buildTimerFields(c),
-      MediaStateCondition c => _buildMediaStateFields(c),
-      SensorStateCondition c => _buildSensorStateFields(c),
-      DeviceStateCondition c => _buildDeviceStateFields(c),
-    },
+        TimeBetweenCondition c => _buildTimeBetweenFields(c),
+        HomePresenceCondition c => _buildHomePresenceFields(c),
+        OnOffCondition c => _buildOnOffFields(c),
+        BrightnessCondition c => _buildBrightnessFields(c),
+        VolumeCondition c => _buildVolumeFields(c),
+        LockUnlockCondition c => _buildLockUnlockFields(c),
+        OpenCloseCondition c => _buildOpenCloseFields(c),
+        TemperatureSettingCondition c => _buildTemperatureSettingFields(c),
+        ArmDisarmCondition c => _buildArmDisarmFields(c),
+        DockCondition c => _buildDockFields(c),
+        StartStopCondition c => _buildStartStopFields(c),
+        FanSpeedCondition c => _buildFanSpeedFields(c),
+        HumiditySettingCondition c => _buildHumiditySettingFields(c),
+        FillCondition c => _buildFillFields(c),
+        EnergyStorageCondition c => _buildEnergyStorageFields(c),
+        MotionDetectionCondition c => _buildMotionDetectionFields(c),
+        OccupancySensingCondition c => _buildOccupancySensingFields(c),
+        OnlineCondition c => _buildOnlineFields(c),
+        TimerCondition c => _buildTimerFields(c),
+        MediaStateCondition c => _buildMediaStateFields(c),
+        SensorStateCondition c => _buildSensorStateFields(c),
+        DeviceStateCondition c => _buildDeviceStateFields(c),
+      },
     );
   }
 
@@ -199,28 +193,12 @@ class ConditionCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          key: ValueKey('timeBetween_weekdays'),
-          initialValue: c.weekdays?.map((d) => d.value).join(', ') ?? '',
-          decoration: const InputDecoration(
-            labelText: 'Weekdays',
-            hintText: 'e.g., MON, TUE, WED (comma-separated)',
-            isDense: true,
-          ),
-          onChanged: (v) {
-            List<Weekday>? weekdays;
-            if (v.isNotEmpty) {
-              weekdays = v
-                  .split(',')
-                  .map((e) => e.trim())
-                  .where((e) => e.isNotEmpty)
-                  .map((e) => Weekday.fromString(e))
-                  .whereType<Weekday>()
-                  .toList();
-            }
-            onChanged(TimeBetweenCondition(
-                after: c.after, before: c.before, weekdays: weekdays));
-          },
+        WeekdaySelector(
+          selected: c.weekdays ?? [],
+          onChanged: (weekdays) => onChanged(TimeBetweenCondition(
+              after: c.after,
+              before: c.before,
+              weekdays: weekdays.isEmpty ? null : weekdays)),
         ),
       ],
     );
@@ -240,33 +218,24 @@ class ConditionCard extends StatelessWidget {
           onChanged: (v) => onChanged(HomePresenceCondition(
             state: v,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildEnumComparisonOperators<HomePresenceMode>(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          HomePresenceMode.values,
-          (mode) => mode.value,
-          (value) => HomePresenceMode.fromString(value),
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(HomePresenceCondition(
+        DropdownButtonFormField<HomePresenceMode>(
+          value: c.is_,
+          decoration: const InputDecoration(
+            labelText: 'Is (Home/Away)',
+            isDense: true,
+          ),
+          items: HomePresenceMode.values.map((mode) {
+            return DropdownMenuItem(
+              value: mode,
+              child: Text(mode.value),
+            );
+          }).toList(),
+          onChanged: (value) => onChanged(HomePresenceCondition(
             state: c.state,
-            is_: is_,
-            isNot: isNot,
-            greaterThan: greaterThan,
-            greaterThanOrEqualTo: greaterThanOrEqualTo,
-            lessThan: lessThan,
-            lessThanOrEqualTo: lessThanOrEqualTo,
+            is_: value,
           )),
         ),
       ],
@@ -286,33 +255,24 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(OnOffCondition(
+        DropdownButtonFormField<bool>(
+          value: c.is_,
+          decoration: const InputDecoration(
+            labelText: 'Is (On/Off)',
+            isDense: true,
+          ),
+          items: const [
+            DropdownMenuItem(value: true, child: Text('True (On)')),
+            DropdownMenuItem(value: false, child: Text('False (Off)')),
+          ],
+          onChanged: (value) => onChanged(OnOffCondition(
             device: c.device,
             state: c.state,
-            is_: is_ as bool?,
-            isNot: isNot as bool?,
-            greaterThan: greaterThan as bool?,
-            greaterThanOrEqualTo: greaterThanOrEqualTo as bool?,
-            lessThan: lessThan as bool?,
-            lessThanOrEqualTo: lessThanOrEqualTo as bool?,
+            is_: value,
           )),
-          isString: false,
         ),
       ],
     );
@@ -331,33 +291,22 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(BrightnessCondition(
+        TextFormField(
+          initialValue: c.is_?.toString() ?? '',
+          decoration: const InputDecoration(
+            labelText: 'Is (Brightness Level)',
+            hintText: 'e.g. 50',
+            isDense: true,
+          ),
+          keyboardType: TextInputType.number,
+          onChanged: (v) => onChanged(BrightnessCondition(
             device: c.device,
             state: c.state,
-            is_: is_ as int?,
-            isNot: isNot as int?,
-            greaterThan: greaterThan as int?,
-            greaterThanOrEqualTo: greaterThanOrEqualTo as int?,
-            lessThan: lessThan as int?,
-            lessThanOrEqualTo: lessThanOrEqualTo as int?,
+            is_: int.tryParse(v),
           )),
-          isString: false,
         ),
       ],
     );
@@ -376,11 +325,6 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
@@ -395,33 +339,32 @@ class ConditionCard extends StatelessWidget {
             device: c.device,
             state: v,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(VolumeCondition(
-            device: c.device,
-            state: c.state,
-            is_: is_,
-            isNot: isNot,
-            greaterThan: greaterThan,
-            greaterThanOrEqualTo: greaterThanOrEqualTo,
-            lessThan: lessThan,
-            lessThanOrEqualTo: lessThanOrEqualTo,
-          )),
-          isString: false,
+        // Simplification: Using text field as it can be int (volume) or bool (isMuted)
+        TextFormField(
+          initialValue: c.is_?.toString() ?? '',
+          decoration: const InputDecoration(
+            labelText: 'Is (Value)',
+            hintText: 'e.g. 50 or true',
+            isDense: true,
+          ),
+          onChanged: (v) {
+            dynamic value = int.tryParse(v); // Try int first
+            if (value == null &&
+                (v.toLowerCase() == 'true' || v.toLowerCase() == 'false')) {
+              value = v.toLowerCase() == 'true'; // Then bool
+            }
+            if (value == null && v.isNotEmpty)
+              value = v; // Fallback to string if not empty
+
+            onChanged(VolumeCondition(
+              device: c.device,
+              state: c.state,
+              is_: value,
+            ));
+          },
         ),
       ],
     );
@@ -440,33 +383,24 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(LockUnlockCondition(
+        DropdownButtonFormField<bool>(
+          value: c.is_,
+          decoration: const InputDecoration(
+            labelText: 'Is Locked',
+            isDense: true,
+          ),
+          items: const [
+            DropdownMenuItem(value: true, child: Text('True (Locked)')),
+            DropdownMenuItem(value: false, child: Text('False (Unlocked)')),
+          ],
+          onChanged: (value) => onChanged(LockUnlockCondition(
             device: c.device,
             state: c.state,
-            is_: is_ as bool?,
-            isNot: isNot as bool?,
-            greaterThan: greaterThan as bool?,
-            greaterThanOrEqualTo: greaterThanOrEqualTo as bool?,
-            lessThan: lessThan as bool?,
-            lessThanOrEqualTo: lessThanOrEqualTo as bool?,
+            is_: value,
           )),
-          isString: false,
         ),
       ],
     );
@@ -485,33 +419,22 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(OpenCloseCondition(
+        TextFormField(
+          initialValue: c.is_?.toString() ?? '',
+          decoration: const InputDecoration(
+            labelText: 'Is (Open Percent)',
+            hintText: 'e.g. 0 (Closed) or 100 (Open)',
+            isDense: true,
+          ),
+          keyboardType: TextInputType.number,
+          onChanged: (v) => onChanged(OpenCloseCondition(
             device: c.device,
             state: c.state,
-            is_: is_ as int?,
-            isNot: isNot as int?,
-            greaterThan: greaterThan as int?,
-            greaterThanOrEqualTo: greaterThanOrEqualTo as int?,
-            lessThan: lessThan as int?,
-            lessThanOrEqualTo: lessThanOrEqualTo as int?,
+            is_: int.tryParse(v),
           )),
-          isString: false,
         ),
       ],
     );
@@ -530,11 +453,6 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
@@ -549,33 +467,28 @@ class ConditionCard extends StatelessWidget {
             device: c.device,
             state: v,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(TemperatureSettingCondition(
-            device: c.device,
-            state: c.state,
-            is_: is_,
-            isNot: isNot,
-            greaterThan: greaterThan,
-            greaterThanOrEqualTo: greaterThanOrEqualTo,
-            lessThan: lessThan,
-            lessThanOrEqualTo: lessThanOrEqualTo,
-          )),
-          isString: false,
+        // Simplification: Using text field as it can be Mode or double
+        TextFormField(
+          initialValue: c.is_?.toString() ?? '',
+          decoration: const InputDecoration(
+            labelText: 'Is (Value)',
+            hintText: 'e.g. heat or 22.5',
+            isDense: true,
+          ),
+          onChanged: (v) {
+            dynamic value = double.tryParse(v);
+            if (value == null && v.isNotEmpty)
+              value = v; // Fallback to string (likely mode)
+
+            onChanged(TemperatureSettingCondition(
+              device: c.device,
+              state: c.state,
+              is_: value,
+            ));
+          },
         ),
       ],
     );
@@ -594,11 +507,6 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
@@ -613,33 +521,31 @@ class ConditionCard extends StatelessWidget {
             device: c.device,
             state: v,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(ArmDisarmCondition(
-            device: c.device,
-            state: c.state,
-            is_: is_,
-            isNot: isNot,
-            greaterThan: greaterThan,
-            greaterThanOrEqualTo: greaterThanOrEqualTo,
-            lessThan: lessThan,
-            lessThanOrEqualTo: lessThanOrEqualTo,
-          )),
-          isString: false,
+        // Simplification: Using text field as it can be bool or String level
+        TextFormField(
+          initialValue: c.is_?.toString() ?? '',
+          decoration: const InputDecoration(
+            labelText: 'Is (Value)',
+            hintText: 'e.g. true or level_name',
+            isDense: true,
+          ),
+          onChanged: (v) {
+            dynamic value;
+            if (v.toLowerCase() == 'true' || v.toLowerCase() == 'false') {
+              value = v.toLowerCase() == 'true';
+            } else if (v.isNotEmpty) {
+              value = v;
+            }
+
+            onChanged(ArmDisarmCondition(
+              device: c.device,
+              state: c.state,
+              is_: value,
+            ));
+          },
         ),
       ],
     );
@@ -658,33 +564,24 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(DockCondition(
+        DropdownButtonFormField<bool>(
+          value: c.is_,
+          decoration: const InputDecoration(
+            labelText: 'Is Docked',
+            isDense: true,
+          ),
+          items: const [
+            DropdownMenuItem(value: true, child: Text('True (Docked)')),
+            DropdownMenuItem(value: false, child: Text('False (Undocked)')),
+          ],
+          onChanged: (value) => onChanged(DockCondition(
             device: c.device,
             state: c.state,
-            is_: is_ as bool?,
-            isNot: isNot as bool?,
-            greaterThan: greaterThan as bool?,
-            greaterThanOrEqualTo: greaterThanOrEqualTo as bool?,
-            lessThan: lessThan as bool?,
-            lessThanOrEqualTo: lessThanOrEqualTo as bool?,
+            is_: value,
           )),
-          isString: false,
         ),
       ],
     );
@@ -703,11 +600,6 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
@@ -722,33 +614,24 @@ class ConditionCard extends StatelessWidget {
             device: c.device,
             state: v,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(StartStopCondition(
+        DropdownButtonFormField<bool>(
+          value: c.is_,
+          decoration: const InputDecoration(
+            labelText: 'Is (Value)',
+            isDense: true,
+          ),
+          items: const [
+            DropdownMenuItem(value: true, child: Text('True')),
+            DropdownMenuItem(value: false, child: Text('False')),
+          ],
+          onChanged: (value) => onChanged(StartStopCondition(
             device: c.device,
             state: c.state,
-            is_: is_ as bool?,
-            isNot: isNot as bool?,
-            greaterThan: greaterThan as bool?,
-            greaterThanOrEqualTo: greaterThanOrEqualTo as bool?,
-            lessThan: lessThan as bool?,
-            lessThanOrEqualTo: lessThanOrEqualTo as bool?,
+            is_: value,
           )),
-          isString: false,
         ),
       ],
     );
@@ -767,11 +650,6 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
@@ -786,33 +664,26 @@ class ConditionCard extends StatelessWidget {
             device: c.device,
             state: v,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(FanSpeedCondition(
-            device: c.device,
-            state: c.state,
-            is_: is_,
-            isNot: isNot,
-            greaterThan: greaterThan,
-            greaterThanOrEqualTo: greaterThanOrEqualTo,
-            lessThan: lessThan,
-            lessThanOrEqualTo: lessThanOrEqualTo,
-          )),
-          isString: false,
+        // Simplification: Can be int or String
+        TextFormField(
+          initialValue: c.is_?.toString() ?? '',
+          decoration: const InputDecoration(
+            labelText: 'Is (Value)',
+            hintText: 'e.g. 50 or speed_low',
+            isDense: true,
+          ),
+          onChanged: (v) {
+            dynamic value = int.tryParse(v);
+            if (value == null && v.isNotEmpty) value = v;
+            onChanged(FanSpeedCondition(
+              device: c.device,
+              state: c.state,
+              is_: value,
+            ));
+          },
         ),
       ],
     );
@@ -831,11 +702,6 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
@@ -849,33 +715,20 @@ class ConditionCard extends StatelessWidget {
             device: c.device,
             state: v,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(HumiditySettingCondition(
+        TextFormField(
+          initialValue: c.is_?.toString() ?? '',
+          decoration: const InputDecoration(
+            labelText: 'Is (Value)',
+            isDense: true,
+          ),
+          onChanged: (v) => onChanged(HumiditySettingCondition(
             device: c.device,
             state: c.state,
-            is_: is_,
-            isNot: isNot,
-            greaterThan: greaterThan,
-            greaterThanOrEqualTo: greaterThanOrEqualTo,
-            lessThan: lessThan,
-            lessThanOrEqualTo: lessThanOrEqualTo,
+            is_: v, // Kept dynamic as per model, likely int/double/string
           )),
-          isString: false,
         ),
       ],
     );
@@ -894,11 +747,6 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
@@ -912,33 +760,20 @@ class ConditionCard extends StatelessWidget {
             device: c.device,
             state: v,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(FillCondition(
+        TextFormField(
+          initialValue: c.is_?.toString() ?? '',
+          decoration: const InputDecoration(
+            labelText: 'Is (Value)',
+            isDense: true,
+          ),
+          onChanged: (v) => onChanged(FillCondition(
             device: c.device,
             state: c.state,
-            is_: is_,
-            isNot: isNot,
-            greaterThan: greaterThan,
-            greaterThanOrEqualTo: greaterThanOrEqualTo,
-            lessThan: lessThan,
-            lessThanOrEqualTo: lessThanOrEqualTo,
+            is_: v,
           )),
-          isString: false,
         ),
       ],
     );
@@ -957,11 +792,6 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
@@ -976,33 +806,29 @@ class ConditionCard extends StatelessWidget {
             device: c.device,
             state: v,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(EnergyStorageCondition(
-            device: c.device,
-            state: c.state,
-            is_: is_,
-            isNot: isNot,
-            greaterThan: greaterThan,
-            greaterThanOrEqualTo: greaterThanOrEqualTo,
-            lessThan: lessThan,
-            lessThanOrEqualTo: lessThanOrEqualTo,
-          )),
-          isString: false,
+        TextFormField(
+          initialValue: c.is_?.toString() ?? '',
+          decoration: const InputDecoration(
+            labelText: 'Is (Value)',
+            isDense: true,
+          ),
+          onChanged: (v) {
+            // Basic parsing
+            dynamic value;
+            if (v.toLowerCase() == 'true' || v.toLowerCase() == 'false') {
+              value = v.toLowerCase() == 'true';
+            } else if (v.isNotEmpty) {
+              value = v;
+            }
+            onChanged(EnergyStorageCondition(
+              device: c.device,
+              state: c.state,
+              is_: value,
+            ));
+          },
         ),
       ],
     );
@@ -1021,33 +847,24 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(MotionDetectionCondition(
+        DropdownButtonFormField<bool>(
+          value: c.is_,
+          decoration: const InputDecoration(
+            labelText: 'Is Motion Detected',
+            isDense: true,
+          ),
+          items: const [
+            DropdownMenuItem(value: true, child: Text('True (Detected)')),
+            DropdownMenuItem(value: false, child: Text('False (No Motion)')),
+          ],
+          onChanged: (value) => onChanged(MotionDetectionCondition(
             device: c.device,
             state: c.state,
-            is_: is_ as bool?,
-            isNot: isNot as bool?,
-            greaterThan: greaterThan as bool?,
-            greaterThanOrEqualTo: greaterThanOrEqualTo as bool?,
-            lessThan: lessThan as bool?,
-            lessThanOrEqualTo: lessThanOrEqualTo as bool?,
+            is_: value,
           )),
-          isString: false,
         ),
       ],
     );
@@ -1066,34 +883,25 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildEnumComparisonOperators<OccupancyState>(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          OccupancyState.values,
-          (state) => state.value,
-          (value) => OccupancyState.fromString(value),
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(OccupancySensingCondition(
+        DropdownButtonFormField<OccupancyState>(
+          value: c.is_,
+          decoration: const InputDecoration(
+            labelText: 'Is',
+            isDense: true,
+          ),
+          items: OccupancyState.values.map((s) {
+            return DropdownMenuItem(
+              value: s,
+              child: Text(s.value),
+            );
+          }).toList(),
+          onChanged: (value) => onChanged(OccupancySensingCondition(
             device: c.device,
             state: c.state,
-            is_: is_,
-            isNot: isNot,
-            greaterThan: greaterThan,
-            greaterThanOrEqualTo: greaterThanOrEqualTo,
-            lessThan: lessThan,
-            lessThanOrEqualTo: lessThanOrEqualTo,
+            is_: value,
           )),
         ),
       ],
@@ -1113,33 +921,24 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(OnlineCondition(
+        DropdownButtonFormField<bool>(
+          value: c.is_,
+          decoration: const InputDecoration(
+            labelText: 'Is Online',
+            isDense: true,
+          ),
+          items: const [
+            DropdownMenuItem(value: true, child: Text('True (Online)')),
+            DropdownMenuItem(value: false, child: Text('False (Offline)')),
+          ],
+          onChanged: (value) => onChanged(OnlineCondition(
             device: c.device,
             state: c.state,
-            is_: is_ as bool?,
-            isNot: isNot as bool?,
-            greaterThan: greaterThan as bool?,
-            greaterThanOrEqualTo: greaterThanOrEqualTo as bool?,
-            lessThan: lessThan as bool?,
-            lessThanOrEqualTo: lessThanOrEqualTo as bool?,
+            is_: value,
           )),
-          isString: false,
         ),
       ],
     );
@@ -1158,11 +957,6 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
@@ -1177,33 +971,20 @@ class ConditionCard extends StatelessWidget {
             device: c.device,
             state: v,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(TimerCondition(
+        TextFormField(
+          initialValue: c.is_?.toString() ?? '',
+          decoration: const InputDecoration(
+            labelText: 'Is (Value)',
+            isDense: true,
+          ),
+          onChanged: (v) => onChanged(TimerCondition(
             device: c.device,
             state: c.state,
-            is_: is_,
-            isNot: isNot,
-            greaterThan: greaterThan,
-            greaterThanOrEqualTo: greaterThanOrEqualTo,
-            lessThan: lessThan,
-            lessThanOrEqualTo: lessThanOrEqualTo,
+            is_: v,
           )),
-          isString: false,
         ),
       ],
     );
@@ -1222,11 +1003,6 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
@@ -1241,57 +1017,27 @@ class ConditionCard extends StatelessWidget {
             device: c.device,
             state: v,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        c.state == 'playbackState'
-            ? _buildEnumComparisonOperators<PlaybackState>(
-                c.is_,
-                c.isNot,
-                c.greaterThan,
-                c.greaterThanOrEqualTo,
-                c.lessThan,
-                c.lessThanOrEqualTo,
-                PlaybackState.values,
-                (state) => state.value,
-                (value) => PlaybackState.fromString(value),
-                (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-                    onChanged(MediaStateCondition(
-                  device: c.device,
-                  state: c.state,
-                  is_: is_,
-                  isNot: isNot,
-                  greaterThan: greaterThan,
-                  greaterThanOrEqualTo: greaterThanOrEqualTo,
-                  lessThan: lessThan,
-                  lessThanOrEqualTo: lessThanOrEqualTo,
-                )),
-              )
-            : _buildComparisonOperators(
-                c.is_,
-                c.isNot,
-                c.greaterThan,
-                c.greaterThanOrEqualTo,
-                c.lessThan,
-                c.lessThanOrEqualTo,
-                (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-                    onChanged(MediaStateCondition(
-                  device: c.device,
-                  state: c.state,
-                  is_: is_,
-                  isNot: isNot,
-                  greaterThan: greaterThan,
-                  greaterThanOrEqualTo: greaterThanOrEqualTo,
-                  lessThan: lessThan,
-                  lessThanOrEqualTo: lessThanOrEqualTo,
-                )),
-                isString: true,
-              ),
+        DropdownButtonFormField<PlaybackState>(
+          value: c.is_,
+          decoration: const InputDecoration(
+            labelText: 'Is (Playback State)',
+            isDense: true,
+          ),
+          items: PlaybackState.values.map((s) {
+            return DropdownMenuItem(
+              value: s,
+              child: Text(s.value),
+            );
+          }).toList(),
+          onChanged: (value) => onChanged(MediaStateCondition(
+            device: c.device,
+            state: c.state,
+            is_: value,
+          )),
+        ),
       ],
     );
   }
@@ -1309,11 +1055,6 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
@@ -1327,33 +1068,20 @@ class ConditionCard extends StatelessWidget {
             device: c.device,
             state: v,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(SensorStateCondition(
+        TextFormField(
+          initialValue: c.is_?.toString() ?? '',
+          decoration: const InputDecoration(
+            labelText: 'Is (Value)',
+            isDense: true,
+          ),
+          onChanged: (v) => onChanged(SensorStateCondition(
             device: c.device,
             state: c.state,
-            is_: is_,
-            isNot: isNot,
-            greaterThan: greaterThan,
-            greaterThanOrEqualTo: greaterThanOrEqualTo,
-            lessThan: lessThan,
-            lessThanOrEqualTo: lessThanOrEqualTo,
+            is_: v,
           )),
-          isString: false,
         ),
       ],
     );
@@ -1372,11 +1100,6 @@ class ConditionCard extends StatelessWidget {
             device: v,
             state: c.state,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
@@ -1390,343 +1113,20 @@ class ConditionCard extends StatelessWidget {
             device: c.device,
             state: v,
             is_: c.is_,
-            isNot: c.isNot,
-            greaterThan: c.greaterThan,
-            greaterThanOrEqualTo: c.greaterThanOrEqualTo,
-            lessThan: c.lessThan,
-            lessThanOrEqualTo: c.lessThanOrEqualTo,
           )),
         ),
         const SizedBox(height: 8),
-        _buildComparisonOperators(
-          c.is_,
-          c.isNot,
-          c.greaterThan,
-          c.greaterThanOrEqualTo,
-          c.lessThan,
-          c.lessThanOrEqualTo,
-          (is_, isNot, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo) =>
-              onChanged(DeviceStateCondition(
+        TextFormField(
+          initialValue: c.is_?.toString() ?? '',
+          decoration: const InputDecoration(
+            labelText: 'Is (Value)',
+            isDense: true,
+          ),
+          onChanged: (v) => onChanged(DeviceStateCondition(
             device: c.device,
             state: c.state,
-            is_: is_,
-            isNot: isNot,
-            greaterThan: greaterThan,
-            greaterThanOrEqualTo: greaterThanOrEqualTo,
-            lessThan: lessThan,
-            lessThanOrEqualTo: lessThanOrEqualTo,
+            is_: v,
           )),
-          isString: false,
-        ),
-      ],
-    );
-  }
-
-  /// Helper widget to build comparison operator fields
-  Widget _buildComparisonOperators(
-    dynamic is_,
-    dynamic isNot,
-    dynamic greaterThan,
-    dynamic greaterThanOrEqualTo,
-    dynamic lessThan,
-    dynamic lessThanOrEqualTo,
-    void Function(
-      dynamic is_,
-      dynamic isNot,
-      dynamic greaterThan,
-      dynamic greaterThanOrEqualTo,
-      dynamic lessThan,
-      dynamic lessThanOrEqualTo,
-    ) onChanged, {required bool isString}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Comparison Operators (use one):',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                initialValue: is_?.toString() ?? '',
-                decoration: const InputDecoration(
-                  labelText: 'Is',
-                  hintText: 'Exact match',
-                  isDense: true,
-                ),
-                keyboardType: isString ? TextInputType.text : TextInputType.number,
-                onChanged: (v) {
-                  final value = v.isEmpty
-                      ? null
-                      : (isString
-                          ? v
-                          : (is_ is int
-                              ? int.tryParse(v)
-                              : (is_ is double
-                                  ? double.tryParse(v)
-                                  : (is_ is bool
-                                      ? v.toLowerCase() == 'true'
-                                      : v))));
-                  onChanged(
-                    value,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextFormField(
-                initialValue: isNot?.toString() ?? '',
-                decoration: const InputDecoration(
-                  labelText: 'Is Not',
-                  hintText: 'Not equal',
-                  isDense: true,
-                ),
-                keyboardType: isString ? TextInputType.text : TextInputType.number,
-                onChanged: (v) {
-                  final value = v.isEmpty
-                      ? null
-                      : (isString
-                          ? v
-                          : (isNot is int
-                              ? int.tryParse(v)
-                              : (isNot is double
-                                  ? double.tryParse(v)
-                                  : (isNot is bool
-                                      ? v.toLowerCase() == 'true'
-                                      : v))));
-                  onChanged(
-                    null,
-                    value,
-                    null,
-                    null,
-                    null,
-                    null,
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                initialValue: greaterThan?.toString() ?? '',
-                decoration: const InputDecoration(
-                  labelText: 'Greater Than',
-                  hintText: '>',
-                  isDense: true,
-                ),
-                keyboardType: isString ? TextInputType.text : TextInputType.number,
-                onChanged: (v) {
-                  final value = v.isEmpty
-                      ? null
-                      : (isString
-                          ? v
-                          : (greaterThan is int
-                              ? int.tryParse(v)
-                              : (greaterThan is double ? double.tryParse(v) : v)));
-                  onChanged(
-                    null,
-                    null,
-                    value,
-                    null,
-                    null,
-                    null,
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextFormField(
-                initialValue: greaterThanOrEqualTo?.toString() ?? '',
-                decoration: const InputDecoration(
-                  labelText: 'Greater Than Or Equal',
-                  hintText: '>=',
-                  isDense: true,
-                ),
-                keyboardType: isString ? TextInputType.text : TextInputType.number,
-                onChanged: (v) {
-                  final value = v.isEmpty
-                      ? null
-                      : (isString
-                          ? v
-                          : (greaterThanOrEqualTo is int
-                              ? int.tryParse(v)
-                              : (greaterThanOrEqualTo is double
-                                  ? double.tryParse(v)
-                                  : v)));
-                  onChanged(
-                    null,
-                    null,
-                    null,
-                    value,
-                    null,
-                    null,
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                initialValue: lessThan?.toString() ?? '',
-                decoration: const InputDecoration(
-                  labelText: 'Less Than',
-                  hintText: '<',
-                  isDense: true,
-                ),
-                keyboardType: isString ? TextInputType.text : TextInputType.number,
-                onChanged: (v) {
-                  final value = v.isEmpty
-                      ? null
-                      : (isString
-                          ? v
-                          : (lessThan is int
-                              ? int.tryParse(v)
-                              : (lessThan is double ? double.tryParse(v) : v)));
-                  onChanged(
-                    null,
-                    null,
-                    null,
-                    null,
-                    value,
-                    null,
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextFormField(
-                initialValue: lessThanOrEqualTo?.toString() ?? '',
-                decoration: const InputDecoration(
-                  labelText: 'Less Than Or Equal',
-                  hintText: '<=',
-                  isDense: true,
-                ),
-                keyboardType: isString ? TextInputType.text : TextInputType.number,
-                onChanged: (v) {
-                  final value = v.isEmpty
-                      ? null
-                      : (isString
-                          ? v
-                          : (lessThanOrEqualTo is int
-                              ? int.tryParse(v)
-                              : (lessThanOrEqualTo is double
-                                  ? double.tryParse(v)
-                                  : v)));
-                  onChanged(
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    value,
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  /// Build comparison operators for enum types using dropdowns
-  Widget _buildEnumComparisonOperators<T extends Enum>(
-    T? is_,
-    T? isNot,
-    T? greaterThan,
-    T? greaterThanOrEqualTo,
-    T? lessThan,
-    T? lessThanOrEqualTo,
-    List<T> enumValues,
-    String Function(T) getValue,
-    T? Function(String?) parseValue,
-    void Function(
-      T? is_,
-      T? isNot,
-      T? greaterThan,
-      T? greaterThanOrEqualTo,
-      T? lessThan,
-      T? lessThanOrEqualTo,
-    ) onChanged,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Comparison Operators (use one):',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: DropdownButtonFormField<T?>(
-                value: is_,
-                decoration: const InputDecoration(
-                  labelText: 'Is',
-                  isDense: true,
-                ),
-                items: [
-                  DropdownMenuItem<T?>(value: null, child: const Text('None')),
-                  ...enumValues.map((e) => DropdownMenuItem<T?>(
-                        value: e,
-                        child: Text(getValue(e)),
-                      )),
-                ],
-                onChanged: (value) => onChanged(
-                  value,
-                  isNot,
-                  greaterThan,
-                  greaterThanOrEqualTo,
-                  lessThan,
-                  lessThanOrEqualTo,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: DropdownButtonFormField<T?>(
-                value: isNot,
-                decoration: const InputDecoration(
-                  labelText: 'Is Not',
-                  isDense: true,
-                ),
-                items: [
-                  DropdownMenuItem<T?>(value: null, child: const Text('None')),
-                  ...enumValues.map((e) => DropdownMenuItem<T?>(
-                        value: e,
-                        child: Text(getValue(e)),
-                      )),
-                ],
-                onChanged: (value) => onChanged(
-                  is_,
-                  value,
-                  greaterThan,
-                  greaterThanOrEqualTo,
-                  lessThan,
-                  lessThanOrEqualTo,
-                ),
-              ),
-            ),
-          ],
         ),
       ],
     );

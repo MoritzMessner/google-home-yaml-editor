@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../domain/models/condition.dart'; // Added for HomePresenceMode
 import '../../../../domain/models/starter.dart';
 import '../../../core/themes/app_theme.dart';
+import 'weekday_selector.dart';
 
 /// Card for editing a starter (trigger) in the automation
 class StarterCard extends StatelessWidget {
@@ -89,10 +91,10 @@ class StarterCard extends StatelessWidget {
       OkGoogleStarter s => _buildOkGoogleFields(s),
       TimeScheduleStarter s => _buildTimeScheduleFields(s),
       HomePresenceStarter s => _buildHomePresenceFields(s),
-      DoorbellPressStarter s => _buildDeviceField(s.device, 'Device',
-          (v) => DoorbellPressStarter(device: v)),
-      MotionDetectionEventStarter s => _buildDeviceField(s.device, 'Device',
-          (v) => MotionDetectionEventStarter(device: v)),
+      DoorbellPressStarter s => _buildDeviceField(
+          s.device, 'Device', (v) => DoorbellPressStarter(device: v)),
+      MotionDetectionEventStarter s => _buildDeviceField(
+          s.device, 'Device', (v) => MotionDetectionEventStarter(device: v)),
       PersonDetectionStarter s => _buildDeviceField(
           s.device, 'Device', (v) => PersonDetectionStarter(device: v)),
       FaceFamiliarDetectionStarter s => _buildDeviceField(
@@ -124,25 +126,41 @@ class StarterCard extends StatelessWidget {
 
   Widget _buildOkGoogleFields(OkGoogleStarter s) {
     return TextFormField(
-      initialValue: s.eventData ?? '',
+      key: ValueKey(s.runtimeType),
+      initialValue: s.eventData,
       decoration: const InputDecoration(
         labelText: 'Voice Command',
         hintText: 'e.g., Movie Night',
         isDense: true,
       ),
-      onChanged: (v) => onChanged(OkGoogleStarter(eventData: v.isEmpty ? null : v)),
+      onChanged: (v) => onChanged(OkGoogleStarter(eventData: v)),
     );
   }
 
   Widget _buildTimeScheduleFields(TimeScheduleStarter s) {
-    return TextFormField(
-      initialValue: s.at,
-      decoration: const InputDecoration(
-        labelText: 'Time',
-        hintText: 'e.g., 6:00 pm, sunrise, sunset',
-        isDense: true,
-      ),
-      onChanged: (v) => onChanged(TimeScheduleStarter(at: v)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          key: ValueKey('${s.runtimeType}.at'),
+          initialValue: s.at,
+          decoration: const InputDecoration(
+            labelText: 'Time',
+            hintText: 'e.g., 6:00 pm, sunrise, sunset',
+            isDense: true,
+          ),
+          onChanged: (v) =>
+              onChanged(TimeScheduleStarter(at: v, weekdays: s.weekdays)),
+        ),
+        const SizedBox(height: 12),
+        WeekdaySelector(
+          selected: s.weekdays ?? [],
+          onChanged: (weekdays) => onChanged(
+            TimeScheduleStarter(
+                at: s.at, weekdays: weekdays.isEmpty ? null : weekdays),
+          ),
+        ),
+      ],
     );
   }
 
@@ -150,18 +168,20 @@ class StarterCard extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: DropdownButtonFormField<String>(
+          child: DropdownButtonFormField<HomePresenceMode>(
             initialValue: s.is_,
             decoration: const InputDecoration(
               labelText: 'Presence',
               isDense: true,
             ),
-            items: const [
-              DropdownMenuItem(value: 'HOME', child: Text('Home')),
-              DropdownMenuItem(value: 'AWAY', child: Text('Away')),
-            ],
-            onChanged: (v) => onChanged(
-                HomePresenceStarter(state: s.state, is_: v ?? s.is_)),
+            items: HomePresenceMode.values.map((mode) {
+              return DropdownMenuItem(
+                value: mode,
+                child: Text(mode.value),
+              );
+            }).toList(),
+            onChanged: (v) =>
+                onChanged(HomePresenceStarter(state: s.state, is_: v ?? s.is_)),
           ),
         ),
       ],
@@ -171,6 +191,7 @@ class StarterCard extends StatelessWidget {
   Widget _buildDeviceField(
       String device, String label, Starter Function(String) creator) {
     return TextFormField(
+      key: ValueKey('${starter.runtimeType}.device'),
       initialValue: device,
       decoration: InputDecoration(
         labelText: label,
@@ -191,8 +212,8 @@ class StarterCard extends StatelessWidget {
               labelText: 'Device',
               isDense: true,
             ),
-            onChanged: (v) =>
-                onChanged(OnOffStateStarter(device: v, state: s.state, is_: s.is_)),
+            onChanged: (v) => onChanged(
+                OnOffStateStarter(device: v, state: s.state, is_: s.is_)),
           ),
         ),
         const SizedBox(width: 12),
@@ -208,8 +229,8 @@ class StarterCard extends StatelessWidget {
               DropdownMenuItem(value: true, child: Text('On')),
               DropdownMenuItem(value: false, child: Text('Off')),
             ],
-            onChanged: (v) =>
-                onChanged(OnOffStateStarter(device: s.device, state: s.state, is_: v ?? s.is_)),
+            onChanged: (v) => onChanged(OnOffStateStarter(
+                device: s.device, state: s.state, is_: v ?? s.is_)),
           ),
         ),
       ],
@@ -226,8 +247,8 @@ class StarterCard extends StatelessWidget {
               labelText: 'Device',
               isDense: true,
             ),
-            onChanged: (v) =>
-                onChanged(BrightnessStateStarter(device: v, state: s.state, is_: s.is_)),
+            onChanged: (v) => onChanged(
+                BrightnessStateStarter(device: v, state: s.state, is_: s.is_)),
           ),
         ),
         const SizedBox(width: 12),
@@ -241,7 +262,9 @@ class StarterCard extends StatelessWidget {
             ),
             keyboardType: TextInputType.number,
             onChanged: (v) => onChanged(BrightnessStateStarter(
-                device: s.device, state: s.state, is_: int.tryParse(v) ?? s.is_)),
+                device: s.device,
+                state: s.state,
+                is_: int.tryParse(v) ?? s.is_)),
           ),
         ),
       ],
@@ -258,8 +281,8 @@ class StarterCard extends StatelessWidget {
               labelText: 'Device',
               isDense: true,
             ),
-            onChanged: (v) =>
-                onChanged(LockUnlockStateStarter(device: v, state: s.state, is_: s.is_)),
+            onChanged: (v) => onChanged(
+                LockUnlockStateStarter(device: v, state: s.state, is_: s.is_)),
           ),
         ),
         const SizedBox(width: 12),
@@ -275,8 +298,8 @@ class StarterCard extends StatelessWidget {
               DropdownMenuItem(value: true, child: Text('Locked')),
               DropdownMenuItem(value: false, child: Text('Unlocked')),
             ],
-            onChanged: (v) => onChanged(
-                LockUnlockStateStarter(device: s.device, state: s.state, is_: v ?? s.is_)),
+            onChanged: (v) => onChanged(LockUnlockStateStarter(
+                device: s.device, state: s.state, is_: v ?? s.is_)),
           ),
         ),
       ],
@@ -293,8 +316,8 @@ class StarterCard extends StatelessWidget {
               labelText: 'Device',
               isDense: true,
             ),
-            onChanged: (v) =>
-                onChanged(OpenCloseStateStarter(device: v, state: s.state, is_: s.is_)),
+            onChanged: (v) => onChanged(
+                OpenCloseStateStarter(device: v, state: s.state, is_: s.is_)),
           ),
         ),
         const SizedBox(width: 12),
@@ -308,7 +331,9 @@ class StarterCard extends StatelessWidget {
             ),
             keyboardType: TextInputType.number,
             onChanged: (v) => onChanged(OpenCloseStateStarter(
-                device: s.device, state: s.state, is_: int.tryParse(v) ?? s.is_)),
+                device: s.device,
+                state: s.state,
+                is_: int.tryParse(v) ?? s.is_)),
           ),
         ),
       ],
@@ -370,8 +395,8 @@ class StarterCard extends StatelessWidget {
               labelText: 'Device',
               isDense: true,
             ),
-            onChanged: (v) =>
-                onChanged(MotionDetectionStateStarter(device: v, state: s.state, is_: s.is_)),
+            onChanged: (v) => onChanged(MotionDetectionStateStarter(
+                device: v, state: s.state, is_: s.is_)),
           ),
         ),
         const SizedBox(width: 12),
@@ -387,8 +412,8 @@ class StarterCard extends StatelessWidget {
               DropdownMenuItem(value: true, child: Text('Detected')),
               DropdownMenuItem(value: false, child: Text('Clear')),
             ],
-            onChanged: (v) => onChanged(
-                MotionDetectionStateStarter(device: s.device, state: s.state, is_: v ?? s.is_)),
+            onChanged: (v) => onChanged(MotionDetectionStateStarter(
+                device: s.device, state: s.state, is_: v ?? s.is_)),
           ),
         ),
       ],
@@ -405,8 +430,8 @@ class StarterCard extends StatelessWidget {
               labelText: 'Device',
               isDense: true,
             ),
-            onChanged: (v) =>
-                onChanged(OccupancyStateStarter(device: v, state: s.state, is_: s.is_)),
+            onChanged: (v) => onChanged(
+                OccupancyStateStarter(device: v, state: s.state, is_: s.is_)),
           ),
         ),
         const SizedBox(width: 12),
@@ -422,8 +447,8 @@ class StarterCard extends StatelessWidget {
               DropdownMenuItem(value: 'OCCUPIED', child: Text('Occupied')),
               DropdownMenuItem(value: 'UNOCCUPIED', child: Text('Unoccupied')),
             ],
-            onChanged: (v) => onChanged(
-                OccupancyStateStarter(device: s.device, state: s.state, is_: v ?? s.is_)),
+            onChanged: (v) => onChanged(OccupancyStateStarter(
+                device: s.device, state: s.state, is_: v ?? s.is_)),
           ),
         ),
       ],
@@ -498,8 +523,8 @@ class StarterCard extends StatelessWidget {
                   hintText: 'e.g., timerPaused',
                   isDense: true,
                 ),
-                onChanged: (v) => onChanged(TimerStateStarter(
-                    device: s.device, state: v, is_: s.is_)),
+                onChanged: (v) => onChanged(
+                    TimerStateStarter(device: s.device, state: v, is_: s.is_)),
               ),
             ),
             const SizedBox(width: 12),
@@ -542,8 +567,8 @@ class StarterCard extends StatelessWidget {
                   labelText: 'State',
                   isDense: true,
                 ),
-                onChanged: (v) => onChanged(DeviceStateStarter(
-                    device: s.device, state: v, is_: s.is_)),
+                onChanged: (v) => onChanged(
+                    DeviceStateStarter(device: s.device, state: v, is_: s.is_)),
               ),
             ),
             const SizedBox(width: 12),

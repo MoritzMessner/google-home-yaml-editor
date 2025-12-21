@@ -102,18 +102,18 @@ class ActionCard extends StatelessWidget {
       ColorAbsoluteAction a => _buildColorAbsoluteFields(a),
       SetVolumeAction a => _buildSetVolumeFields(a),
       MuteAction a => _buildMuteFields(a),
-      MediaNextAction a => _buildDevicesOnlyField(a.devices, 'Devices',
-          (v) => MediaNextAction(devices: v)),
-      MediaPreviousAction a => _buildDevicesOnlyField(a.devices, 'Devices',
-          (v) => MediaPreviousAction(devices: v)),
-      MediaPauseAction a => _buildDevicesOnlyField(a.devices, 'Devices',
-          (v) => MediaPauseAction(devices: v)),
-      MediaResumeAction a => _buildDevicesOnlyField(a.devices, 'Devices',
-          (v) => MediaResumeAction(devices: v)),
-      MediaStopAction a => _buildDevicesOnlyField(a.devices, 'Devices',
-          (v) => MediaStopAction(devices: v)),
-      MediaShuffleAction a => _buildDevicesOnlyField(a.devices, 'Devices',
-          (v) => MediaShuffleAction(devices: v)),
+      MediaNextAction a => _buildDevicesOnlyField(
+          a.devices, 'Devices', (v) => MediaNextAction(devices: v)),
+      MediaPreviousAction a => _buildDevicesOnlyField(
+          a.devices, 'Devices', (v) => MediaPreviousAction(devices: v)),
+      MediaPauseAction a => _buildDevicesOnlyField(
+          a.devices, 'Devices', (v) => MediaPauseAction(devices: v)),
+      MediaResumeAction a => _buildDevicesOnlyField(
+          a.devices, 'Devices', (v) => MediaResumeAction(devices: v)),
+      MediaStopAction a => _buildDevicesOnlyField(
+          a.devices, 'Devices', (v) => MediaStopAction(devices: v)),
+      MediaShuffleAction a => _buildDevicesOnlyField(
+          a.devices, 'Devices', (v) => MediaShuffleAction(devices: v)),
       LockUnlockAction a => _buildLockUnlockFields(a),
       OpenCloseAction a => _buildOpenCloseFields(a),
       ArmDisarmAction a => _buildArmDisarmFields(a),
@@ -156,17 +156,15 @@ class ActionCard extends StatelessWidget {
       TimerCancelAction a => _buildDevicesOnlyField(
           a.devices, 'Devices', (v) => TimerCancelAction(devices: v)),
       LightEffectColorLoopAction a => _buildLightEffectFields(
-          a.devices, a.duration, (d, dur) =>
-              LightEffectColorLoopAction(devices: d, duration: dur)),
-      LightEffectPulseAction a => _buildLightEffectFields(
-          a.devices, a.duration, (d, dur) =>
-              LightEffectPulseAction(devices: d, duration: dur)),
-      LightEffectSleepAction a => _buildLightEffectFields(
-          a.devices, a.duration, (d, dur) =>
-              LightEffectSleepAction(devices: d, duration: dur)),
-      LightEffectWakeAction a => _buildLightEffectFields(
-          a.devices, a.duration, (d, dur) =>
-              LightEffectWakeAction(devices: d, duration: dur)),
+          a.devices,
+          a.duration,
+          (d, dur) => LightEffectColorLoopAction(devices: d, duration: dur)),
+      LightEffectPulseAction a => _buildLightEffectFields(a.devices, a.duration,
+          (d, dur) => LightEffectPulseAction(devices: d, duration: dur)),
+      LightEffectSleepAction a => _buildLightEffectFields(a.devices, a.duration,
+          (d, dur) => LightEffectSleepAction(devices: d, duration: dur)),
+      LightEffectWakeAction a => _buildLightEffectFields(a.devices, a.duration,
+          (d, dur) => LightEffectWakeAction(devices: d, duration: dur)),
       StopLightEffectAction a => _buildDevicesOnlyField(
           a.devices, 'Devices', (v) => StopLightEffectAction(devices: v)),
       AppSelectAction a => _buildAppSelectFields(a),
@@ -183,6 +181,7 @@ class ActionCard extends StatelessWidget {
 
   Widget _buildDelayFields(DelayAction a) {
     return TextFormField(
+      key: ValueKey('${a.runtimeType}.duration'),
       initialValue: a.duration,
       decoration: const InputDecoration(
         labelText: 'Duration',
@@ -195,6 +194,7 @@ class ActionCard extends StatelessWidget {
 
   Widget _buildBroadcastFields(BroadcastAction a) {
     return TextFormField(
+      key: ValueKey('${a.runtimeType}.message'),
       initialValue: a.message,
       decoration: const InputDecoration(
         labelText: 'Message',
@@ -207,6 +207,7 @@ class ActionCard extends StatelessWidget {
 
   Widget _buildAssistantCommandFields(AssistantCommandAction a) {
     return TextFormField(
+      key: ValueKey('${a.runtimeType}.command'),
       initialValue: a.command,
       decoration: const InputDecoration(
         labelText: 'Command',
@@ -222,6 +223,7 @@ class ActionCard extends StatelessWidget {
       children: [
         Expanded(
           child: TextFormField(
+            key: ValueKey('${a.runtimeType}.devices'),
             initialValue: a.devices.join(', '),
             decoration: const InputDecoration(
               labelText: 'Devices',
@@ -229,7 +231,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(OnOffAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               on: a.on,
             )),
           ),
@@ -247,7 +253,8 @@ class ActionCard extends StatelessWidget {
               DropdownMenuItem(value: true, child: Text('On')),
               DropdownMenuItem(value: false, child: Text('Off')),
             ],
-            onChanged: (v) => onChanged(OnOffAction(devices: a.devices, on: v ?? a.on)),
+            onChanged: (v) =>
+                onChanged(OnOffAction(devices: a.devices, on: v ?? a.on)),
           ),
         ),
       ],
@@ -264,7 +271,8 @@ class ActionCard extends StatelessWidget {
               labelText: 'Scene',
               isDense: true,
             ),
-            onChanged: (v) => onChanged(ActivateSceneAction(scene: v, activate: a.activate)),
+            onChanged: (v) =>
+                onChanged(ActivateSceneAction(scene: v, activate: a.activate)),
           ),
         ),
         const SizedBox(width: 12),
@@ -280,7 +288,8 @@ class ActionCard extends StatelessWidget {
               DropdownMenuItem(value: true, child: Text('Activate')),
               DropdownMenuItem(value: false, child: Text('Deactivate')),
             ],
-            onChanged: (v) => onChanged(ActivateSceneAction(scene: a.scene, activate: v ?? a.activate)),
+            onChanged: (v) => onChanged(
+                ActivateSceneAction(scene: a.scene, activate: v ?? a.activate)),
           ),
         ),
       ],
@@ -299,7 +308,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(BrightnessAbsoluteAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               brightness: a.brightness,
             )),
           ),
@@ -334,7 +347,11 @@ class ActionCard extends StatelessWidget {
             isDense: true,
           ),
           onChanged: (v) => onChanged(BrightnessRelativeAction(
-            devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+            devices: v
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList(),
             brightnessRelativePercent: a.brightnessRelativePercent,
             brightnessRelativeWeight: a.brightnessRelativeWeight,
           )),
@@ -384,22 +401,45 @@ class ActionCard extends StatelessWidget {
     return Column(
       children: [
         TextFormField(
+          key: ValueKey('${a.runtimeType}.devices'),
           initialValue: a.devices.join(', '),
           decoration: const InputDecoration(
             labelText: 'Devices',
             isDense: true,
           ),
           onChanged: (v) => onChanged(ColorAbsoluteAction(
-            devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+            devices: v
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList(),
             temperature: a.temperature,
-            colorName: a.colorName,
-            spectrumHSV: a.spectrumHSV,
             spectrumRGB: a.spectrumRGB,
           )),
         ),
         const SizedBox(height: 8),
         Row(
           children: [
+            Expanded(
+              child: TextFormField(
+                initialValue: a.spectrumRGB
+                        ?.toRadixString(16)
+                        .toUpperCase()
+                        .padLeft(6, '0') ??
+                    '',
+                decoration: const InputDecoration(
+                  labelText: 'RGB (hex)',
+                  hintText: 'e.g., FF0000',
+                  isDense: true,
+                ),
+                onChanged: (v) => onChanged(ColorAbsoluteAction(
+                  devices: a.devices,
+                  temperature: a.temperature,
+                  spectrumRGB: v.isEmpty ? null : int.tryParse(v, radix: 16),
+                )),
+              ),
+            ),
+            const SizedBox(width: 12),
             Expanded(
               child: TextFormField(
                 initialValue: a.temperature?.toString() ?? '',
@@ -411,136 +451,8 @@ class ActionCard extends StatelessWidget {
                 keyboardType: TextInputType.number,
                 onChanged: (v) => onChanged(ColorAbsoluteAction(
                   devices: a.devices,
+                  spectrumRGB: a.spectrumRGB,
                   temperature: int.tryParse(v),
-                  colorName: a.colorName,
-                  spectrumHSV: a.spectrumHSV,
-                  spectrumRGB: a.spectrumRGB,
-                )),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextFormField(
-                initialValue: a.colorName ?? '',
-                decoration: const InputDecoration(
-                  labelText: 'Color Name',
-                  hintText: 'e.g., red',
-                  isDense: true,
-                ),
-                onChanged: (v) => onChanged(ColorAbsoluteAction(
-                  devices: a.devices,
-                  temperature: a.temperature,
-                  colorName: v.isEmpty ? null : v,
-                  spectrumHSV: a.spectrumHSV,
-                  spectrumRGB: a.spectrumRGB,
-                )),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                initialValue: a.spectrumRGB?.toRadixString(16).padLeft(6, '0') ?? '',
-                decoration: const InputDecoration(
-                  labelText: 'RGB (hex)',
-                  hintText: 'e.g., FF0000',
-                  isDense: true,
-                ),
-                onChanged: (v) => onChanged(ColorAbsoluteAction(
-                  devices: a.devices,
-                  temperature: a.temperature,
-                  colorName: a.colorName,
-                  spectrumHSV: a.spectrumHSV,
-                  spectrumRGB: v.isEmpty ? null : int.tryParse(v, radix: 16),
-                )),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'HSV: ${a.spectrumHSV != null ? "H:${a.spectrumHSV!.hue.toStringAsFixed(1)} S:${a.spectrumHSV!.saturation.toStringAsFixed(1)} V:${a.spectrumHSV!.value.toStringAsFixed(1)}" : "Not set"}',
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                initialValue: a.spectrumHSV?.hue.toStringAsFixed(1) ?? '',
-                decoration: const InputDecoration(
-                  labelText: 'HSV Hue',
-                  hintText: '0-360',
-                  isDense: true,
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (v) => onChanged(ColorAbsoluteAction(
-                  devices: a.devices,
-                  temperature: a.temperature,
-                  colorName: a.colorName,
-                  spectrumHSV: v.isEmpty
-                      ? null
-                      : SpectrumHSV(
-                          hue: double.tryParse(v) ?? a.spectrumHSV?.hue ?? 0,
-                          saturation: a.spectrumHSV?.saturation ?? 1.0,
-                          value: a.spectrumHSV?.value ?? 1.0,
-                        ),
-                  spectrumRGB: a.spectrumRGB,
-                )),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextFormField(
-                initialValue: a.spectrumHSV?.saturation.toStringAsFixed(1) ?? '',
-                decoration: const InputDecoration(
-                  labelText: 'HSV Saturation',
-                  hintText: '0-1',
-                  isDense: true,
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (v) => onChanged(ColorAbsoluteAction(
-                  devices: a.devices,
-                  temperature: a.temperature,
-                  colorName: a.colorName,
-                  spectrumHSV: a.spectrumHSV == null && v.isEmpty
-                      ? null
-                      : SpectrumHSV(
-                          hue: a.spectrumHSV?.hue ?? 0,
-                          saturation: double.tryParse(v) ?? a.spectrumHSV?.saturation ?? 1.0,
-                          value: a.spectrumHSV?.value ?? 1.0,
-                        ),
-                  spectrumRGB: a.spectrumRGB,
-                )),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextFormField(
-                initialValue: a.spectrumHSV?.value.toStringAsFixed(1) ?? '',
-                decoration: const InputDecoration(
-                  labelText: 'HSV Value',
-                  hintText: '0-1',
-                  isDense: true,
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (v) => onChanged(ColorAbsoluteAction(
-                  devices: a.devices,
-                  temperature: a.temperature,
-                  colorName: a.colorName,
-                  spectrumHSV: a.spectrumHSV == null && v.isEmpty
-                      ? null
-                      : SpectrumHSV(
-                          hue: a.spectrumHSV?.hue ?? 0,
-                          saturation: a.spectrumHSV?.saturation ?? 1.0,
-                          value: double.tryParse(v) ?? a.spectrumHSV?.value ?? 1.0,
-                        ),
-                  spectrumRGB: a.spectrumRGB,
                 )),
               ),
             ),
@@ -561,7 +473,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(SetVolumeAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               volumeLevel: a.volumeLevel,
             )),
           ),
@@ -597,7 +513,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(MuteAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               mute: a.mute,
             )),
           ),
@@ -615,24 +535,29 @@ class ActionCard extends StatelessWidget {
               DropdownMenuItem(value: true, child: Text('Mute')),
               DropdownMenuItem(value: false, child: Text('Unmute')),
             ],
-            onChanged: (v) => onChanged(MuteAction(devices: a.devices, mute: v ?? a.mute)),
+            onChanged: (v) =>
+                onChanged(MuteAction(devices: a.devices, mute: v ?? a.mute)),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDevicesOnlyField(
-      List<String> devices, String label, AutomationAction Function(List<String>) creator) {
+  Widget _buildDevicesOnlyField(List<String> devices, String label,
+      AutomationAction Function(List<String>) creator) {
     return TextFormField(
+      key: ValueKey('${action.runtimeType}.devices'),
       initialValue: devices.join(', '),
       decoration: InputDecoration(
         labelText: label,
         hintText: 'Comma-separated device names',
         isDense: true,
       ),
-      onChanged: (v) => onChanged(creator(
-          v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList())),
+      onChanged: (v) => onChanged(creator(v
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList())),
     );
   }
 
@@ -647,7 +572,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(LockUnlockAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               lock: a.lock,
             )),
           ),
@@ -665,7 +594,8 @@ class ActionCard extends StatelessWidget {
               DropdownMenuItem(value: true, child: Text('Lock')),
               DropdownMenuItem(value: false, child: Text('Unlock')),
             ],
-            onChanged: (v) => onChanged(LockUnlockAction(devices: a.devices, lock: v ?? a.lock)),
+            onChanged: (v) => onChanged(
+                LockUnlockAction(devices: a.devices, lock: v ?? a.lock)),
           ),
         ),
       ],
@@ -682,7 +612,11 @@ class ActionCard extends StatelessWidget {
             isDense: true,
           ),
           onChanged: (v) => onChanged(OpenCloseAction(
-            devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+            devices: v
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList(),
             openPercent: a.openPercent,
             openDirection: a.openDirection,
           )),
@@ -740,7 +674,11 @@ class ActionCard extends StatelessWidget {
                   isDense: true,
                 ),
                 onChanged: (v) => onChanged(ArmDisarmAction(
-                  devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+                  devices: v
+                      .split(',')
+                      .map((e) => e.trim())
+                      .where((e) => e.isNotEmpty)
+                      .toList(),
                   arm: a.arm,
                   armLevel: a.armLevel,
                   cancel: a.cancel,
@@ -828,7 +766,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(ThermostatSetModeAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               thermostatMode: a.thermostatMode,
             )),
           ),
@@ -853,7 +795,8 @@ class ActionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildThermostatTemperatureSetpointFields(ThermostatTemperatureSetpointAction a) {
+  Widget _buildThermostatTemperatureSetpointFields(
+      ThermostatTemperatureSetpointAction a) {
     return Row(
       children: [
         Expanded(
@@ -864,7 +807,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(ThermostatTemperatureSetpointAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               thermostatTemperatureSetpoint: a.thermostatTemperatureSetpoint,
             )),
           ),
@@ -881,7 +828,8 @@ class ActionCard extends StatelessWidget {
             keyboardType: TextInputType.number,
             onChanged: (v) => onChanged(ThermostatTemperatureSetpointAction(
               devices: a.devices,
-              thermostatTemperatureSetpoint: double.tryParse(v) ?? a.thermostatTemperatureSetpoint,
+              thermostatTemperatureSetpoint:
+                  double.tryParse(v) ?? a.thermostatTemperatureSetpoint,
             )),
           ),
         ),
@@ -889,7 +837,8 @@ class ActionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildThermostatTemperatureSetRangeFields(ThermostatTemperatureSetRangeAction a) {
+  Widget _buildThermostatTemperatureSetRangeFields(
+      ThermostatTemperatureSetRangeAction a) {
     return Column(
       children: [
         TextFormField(
@@ -899,9 +848,15 @@ class ActionCard extends StatelessWidget {
             isDense: true,
           ),
           onChanged: (v) => onChanged(ThermostatTemperatureSetRangeAction(
-            devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
-            thermostatTemperatureSetpointHigh: a.thermostatTemperatureSetpointHigh,
-            thermostatTemperatureSetpointLow: a.thermostatTemperatureSetpointLow,
+            devices: v
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList(),
+            thermostatTemperatureSetpointHigh:
+                a.thermostatTemperatureSetpointHigh,
+            thermostatTemperatureSetpointLow:
+                a.thermostatTemperatureSetpointLow,
           )),
         ),
         const SizedBox(height: 8),
@@ -917,8 +872,10 @@ class ActionCard extends StatelessWidget {
                 keyboardType: TextInputType.number,
                 onChanged: (v) => onChanged(ThermostatTemperatureSetRangeAction(
                   devices: a.devices,
-                  thermostatTemperatureSetpointHigh: a.thermostatTemperatureSetpointHigh,
-                  thermostatTemperatureSetpointLow: double.tryParse(v) ?? a.thermostatTemperatureSetpointLow,
+                  thermostatTemperatureSetpointHigh:
+                      a.thermostatTemperatureSetpointHigh,
+                  thermostatTemperatureSetpointLow:
+                      double.tryParse(v) ?? a.thermostatTemperatureSetpointLow,
                 )),
               ),
             ),
@@ -933,8 +890,10 @@ class ActionCard extends StatelessWidget {
                 keyboardType: TextInputType.number,
                 onChanged: (v) => onChanged(ThermostatTemperatureSetRangeAction(
                   devices: a.devices,
-                  thermostatTemperatureSetpointHigh: double.tryParse(v) ?? a.thermostatTemperatureSetpointHigh,
-                  thermostatTemperatureSetpointLow: a.thermostatTemperatureSetpointLow,
+                  thermostatTemperatureSetpointHigh:
+                      double.tryParse(v) ?? a.thermostatTemperatureSetpointHigh,
+                  thermostatTemperatureSetpointLow:
+                      a.thermostatTemperatureSetpointLow,
                 )),
               ),
             ),
@@ -955,7 +914,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(SetFanSpeedAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               fanSpeed: a.fanSpeed,
             )),
           ),
@@ -989,7 +952,11 @@ class ActionCard extends StatelessWidget {
             isDense: true,
           ),
           onChanged: (v) => onChanged(SetFanSpeedRelativeAction(
-            devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+            devices: v
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList(),
             fanSpeedRelativePercent: a.fanSpeedRelativePercent,
             fanSpeedRelativeWeight: a.fanSpeedRelativeWeight,
           )),
@@ -1046,7 +1013,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(SetHumidityAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               humidity: a.humidity,
             )),
           ),
@@ -1081,7 +1052,11 @@ class ActionCard extends StatelessWidget {
             isDense: true,
           ),
           onChanged: (v) => onChanged(HumidityRelativeAction(
-            devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+            devices: v
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList(),
             relativeHumidityPercent: a.relativeHumidityPercent,
             relativeHumidityWeight: a.relativeHumidityWeight,
           )),
@@ -1138,7 +1113,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(StartStopAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               start: a.start,
             )),
           ),
@@ -1156,7 +1135,8 @@ class ActionCard extends StatelessWidget {
               DropdownMenuItem(value: true, child: Text('Start')),
               DropdownMenuItem(value: false, child: Text('Stop')),
             ],
-            onChanged: (v) => onChanged(StartStopAction(devices: a.devices, start: v ?? a.start)),
+            onChanged: (v) => onChanged(
+                StartStopAction(devices: a.devices, start: v ?? a.start)),
           ),
         ),
       ],
@@ -1174,7 +1154,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(PauseUnpauseAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               pause: a.pause,
             )),
           ),
@@ -1192,7 +1176,8 @@ class ActionCard extends StatelessWidget {
               DropdownMenuItem(value: true, child: Text('Pause')),
               DropdownMenuItem(value: false, child: Text('Unpause')),
             ],
-            onChanged: (v) => onChanged(PauseUnpauseAction(devices: a.devices, pause: v ?? a.pause)),
+            onChanged: (v) => onChanged(
+                PauseUnpauseAction(devices: a.devices, pause: v ?? a.pause)),
           ),
         ),
       ],
@@ -1210,7 +1195,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(ChargeAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               charge: a.charge,
             )),
           ),
@@ -1228,7 +1217,8 @@ class ActionCard extends StatelessWidget {
               DropdownMenuItem(value: true, child: Text('Charge')),
               DropdownMenuItem(value: false, child: Text('Stop')),
             ],
-            onChanged: (v) => onChanged(ChargeAction(devices: a.devices, charge: v ?? a.charge)),
+            onChanged: (v) => onChanged(
+                ChargeAction(devices: a.devices, charge: v ?? a.charge)),
           ),
         ),
       ],
@@ -1248,7 +1238,11 @@ class ActionCard extends StatelessWidget {
                   isDense: true,
                 ),
                 onChanged: (v) => onChanged(FillAction(
-                  devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+                  devices: v
+                      .split(',')
+                      .map((e) => e.trim())
+                      .where((e) => e.isNotEmpty)
+                      .toList(),
                   fill: a.fill,
                   fillLevel: a.fillLevel,
                 )),
@@ -1305,7 +1299,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(FindMyDeviceAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               silence: a.silence,
             )),
           ),
@@ -1345,7 +1343,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(SetInputAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               newInput: a.newInput,
             )),
           ),
@@ -1360,7 +1362,8 @@ class ActionCard extends StatelessWidget {
               hintText: 'e.g., HDMI1',
               isDense: true,
             ),
-            onChanged: (v) => onChanged(SetInputAction(devices: a.devices, newInput: v)),
+            onChanged: (v) =>
+                onChanged(SetInputAction(devices: a.devices, newInput: v)),
           ),
         ),
       ],
@@ -1377,7 +1380,11 @@ class ActionCard extends StatelessWidget {
             isDense: true,
           ),
           onChanged: (v) => onChanged(SelectChannelAction(
-            devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+            devices: v
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList(),
             channelNumber: a.channelNumber,
             channelName: a.channelName,
             channelCode: a.channelCode,
@@ -1449,7 +1456,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(RelativeChannelAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               channelCount: a.channelCount,
             )),
           ),
@@ -1484,7 +1495,11 @@ class ActionCard extends StatelessWidget {
             isDense: true,
           ),
           onChanged: (v) => onChanged(RotateAbsoluteAction(
-            devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+            devices: v
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList(),
             rotationPercent: a.rotationPercent,
             rotationDegree: a.rotationDegree,
           )),
@@ -1541,7 +1556,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(TimerStartAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               duration: a.duration,
             )),
           ),
@@ -1556,7 +1575,8 @@ class ActionCard extends StatelessWidget {
               hintText: 'e.g., 30m',
               isDense: true,
             ),
-            onChanged: (v) => onChanged(TimerStartAction(devices: a.devices, duration: v)),
+            onChanged: (v) =>
+                onChanged(TimerStartAction(devices: a.devices, duration: v)),
           ),
         ),
       ],
@@ -1574,7 +1594,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(TimerAdjustAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               duration: a.duration,
             )),
           ),
@@ -1589,15 +1613,16 @@ class ActionCard extends StatelessWidget {
               hintText: 'e.g., 5m',
               isDense: true,
             ),
-            onChanged: (v) => onChanged(TimerAdjustAction(devices: a.devices, duration: v)),
+            onChanged: (v) =>
+                onChanged(TimerAdjustAction(devices: a.devices, duration: v)),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildLightEffectFields(
-      List<String> devices, String? duration, AutomationAction Function(List<String>, String?) creator) {
+  Widget _buildLightEffectFields(List<String> devices, String? duration,
+      AutomationAction Function(List<String>, String?) creator) {
     return Row(
       children: [
         Expanded(
@@ -1608,7 +1633,12 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(creator(
-                v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(), duration)),
+                v
+                    .split(',')
+                    .map((e) => e.trim())
+                    .where((e) => e.isNotEmpty)
+                    .toList(),
+                duration)),
           ),
         ),
         const SizedBox(width: 12),
@@ -1639,7 +1669,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(AppSelectAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               applicationName: a.applicationName,
             )),
           ),
@@ -1653,7 +1687,8 @@ class ActionCard extends StatelessWidget {
               labelText: 'App',
               isDense: true,
             ),
-            onChanged: (v) => onChanged(AppSelectAction(devices: a.devices, applicationName: v)),
+            onChanged: (v) => onChanged(
+                AppSelectAction(devices: a.devices, applicationName: v)),
           ),
         ),
       ],
@@ -1671,7 +1706,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(AppInstallAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               newApplicationName: a.newApplicationName,
             )),
           ),
@@ -1685,7 +1724,8 @@ class ActionCard extends StatelessWidget {
               labelText: 'App',
               isDense: true,
             ),
-            onChanged: (v) => onChanged(AppInstallAction(devices: a.devices, newApplicationName: v)),
+            onChanged: (v) => onChanged(
+                AppInstallAction(devices: a.devices, newApplicationName: v)),
           ),
         ),
       ],
@@ -1703,7 +1743,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(AppSearchAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               applicationName: a.applicationName,
             )),
           ),
@@ -1717,7 +1761,8 @@ class ActionCard extends StatelessWidget {
               labelText: 'App',
               isDense: true,
             ),
-            onChanged: (v) => onChanged(AppSearchAction(devices: a.devices, applicationName: v)),
+            onChanged: (v) => onChanged(
+                AppSearchAction(devices: a.devices, applicationName: v)),
           ),
         ),
       ],
@@ -1737,7 +1782,11 @@ class ActionCard extends StatelessWidget {
                   isDense: true,
                 ),
                 onChanged: (v) => onChanged(CookAction(
-                  devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+                  devices: v
+                      .split(',')
+                      .map((e) => e.trim())
+                      .where((e) => e.isNotEmpty)
+                      .toList(),
                   start: a.start,
                   cookingMode: a.cookingMode,
                   foodPreset: a.foodPreset,
@@ -1864,7 +1913,11 @@ class ActionCard extends StatelessWidget {
             isDense: true,
           ),
           onChanged: (v) => onChanged(DispenseAction(
-            devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+            devices: v
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList(),
             item: a.item,
             amount: a.amount,
             presetName: a.presetName,
@@ -1956,7 +2009,8 @@ class ActionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEnableDisableGuestNetworkFields(EnableDisableGuestNetworkAction a) {
+  Widget _buildEnableDisableGuestNetworkFields(
+      EnableDisableGuestNetworkAction a) {
     return Row(
       children: [
         Expanded(
@@ -1967,7 +2021,11 @@ class ActionCard extends StatelessWidget {
               isDense: true,
             ),
             onChanged: (v) => onChanged(EnableDisableGuestNetworkAction(
-              devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              devices: v
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
               enable: a.enable,
             )),
           ),
@@ -1995,7 +2053,8 @@ class ActionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEnableDisableNetworkProfileFields(EnableDisableNetworkProfileAction a) {
+  Widget _buildEnableDisableNetworkProfileFields(
+      EnableDisableNetworkProfileAction a) {
     return Column(
       children: [
         Row(
@@ -2008,7 +2067,11 @@ class ActionCard extends StatelessWidget {
                   isDense: true,
                 ),
                 onChanged: (v) => onChanged(EnableDisableNetworkProfileAction(
-                  devices: v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+                  devices: v
+                      .split(',')
+                      .map((e) => e.trim())
+                      .where((e) => e.isNotEmpty)
+                      .toList(),
                   enable: a.enable,
                   profile: a.profile,
                 )),

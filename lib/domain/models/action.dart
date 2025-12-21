@@ -18,7 +18,8 @@ sealed class AutomationAction {
 /// Last checked: 2024-12-19
 class DelayAction extends AutomationAction {
   const DelayAction({required this.duration});
-  final String duration; // Duration format: 30min, 1hour, 20sec, 1hour10min20sec
+  final String
+      duration; // Duration format: 30min, 1hour, 20sec, 1hour10min20sec
 }
 
 // ============================================================================
@@ -101,30 +102,12 @@ class BrightnessRelativeAction extends AutomationAction {
 class ColorAbsoluteAction extends AutomationAction {
   const ColorAbsoluteAction({
     required this.devices,
-    this.colorName,
-    this.spectrumHSV,
     this.spectrumRGB,
     this.temperature,
   });
   final List<String> devices;
-  final String? colorName; // Named color (e.g., "blue", "red")
-  final SpectrumHSV? spectrumHSV; // Color in HSV format
   final int? spectrumRGB; // Color in RGB format (hex without #)
   final int? temperature; // Color temperature in Kelvin
-}
-
-/// SpectrumHSV color representation (Hue, Saturation, Value)
-/// Based on https://developers.home.google.com/automations/schema/basics#color
-/// Last checked: 2024-12-19
-class SpectrumHSV {
-  const SpectrumHSV({
-    required this.hue,
-    required this.saturation,
-    required this.value,
-  });
-  final double hue; // Color wavelength
-  final double saturation; // Color intensity
-  final double value; // Relative lightness or darkness
 }
 
 /// Set volume level
@@ -222,7 +205,8 @@ class OpenCloseAction extends AutomationAction {
   });
   final List<String> devices;
   final int? openPercent; // 0 = fully closed, 100 = fully open
-  final String? openDirection; // Optional, for devices supporting multiple directions
+  final String?
+      openDirection; // Optional, for devices supporting multiple directions
 }
 
 /// Arm or disarm security devices
@@ -504,7 +488,8 @@ class TimerStartAction extends AutomationAction {
     required this.duration,
   });
   final List<String> devices;
-  final String duration; // Duration format: 30min, 1hour, 20sec, 1hour10min20sec
+  final String
+      duration; // Duration format: 30min, 1hour, 20sec, 1hour10min20sec
 }
 
 /// Adjust timer duration
@@ -516,7 +501,8 @@ class TimerAdjustAction extends AutomationAction {
     required this.duration,
   });
   final List<String> devices;
-  final String duration; // Duration format: 30min, 1hour, 20sec, 1hour10min20sec
+  final String
+      duration; // Duration format: 30min, 1hour, 20sec, 1hour10min20sec
 }
 
 /// Pause timer
@@ -552,7 +538,8 @@ class LightEffectColorLoopAction extends AutomationAction {
     this.duration,
   });
   final List<String> devices;
-  final String? duration; // Duration format: 30min, 1hour, 20sec, 1hour10min20sec
+  final String?
+      duration; // Duration format: 30min, 1hour, 20sec, 1hour10min20sec
 }
 
 /// Light effect: pulse
@@ -564,7 +551,8 @@ class LightEffectPulseAction extends AutomationAction {
     this.duration,
   });
   final List<String> devices;
-  final String? duration; // Duration format: 30min, 1hour, 20sec, 1hour10min20sec
+  final String?
+      duration; // Duration format: 30min, 1hour, 20sec, 1hour10min20sec
 }
 
 /// Light effect: sleep (gradual dim)
@@ -576,7 +564,8 @@ class LightEffectSleepAction extends AutomationAction {
     this.duration,
   });
   final List<String> devices;
-  final String? duration; // Duration format: 30min, 1hour, 20sec, 1hour10min20sec
+  final String?
+      duration; // Duration format: 30min, 1hour, 20sec, 1hour10min20sec
 }
 
 /// Light effect: wake (gradual brighten)
@@ -588,7 +577,8 @@ class LightEffectWakeAction extends AutomationAction {
     this.duration,
   });
   final List<String> devices;
-  final String? duration; // Duration format: 30min, 1hour, 20sec, 1hour10min20sec
+  final String?
+      duration; // Duration format: 30min, 1hour, 20sec, 1hour10min20sec
 }
 
 /// Stop light effect
@@ -727,8 +717,7 @@ enum ActionType {
   brightnessAbsolute('Set Brightness', 'device.command.BrightnessAbsolute'),
 
   /// https://developers.home.google.com/automations/schema/reference/entity/sht_device/brightness_relative_command
-  brightnessRelative(
-      'Adjust Brightness', 'device.command.BrightnessRelative'),
+  brightnessRelative('Adjust Brightness', 'device.command.BrightnessRelative'),
 
   /// https://developers.home.google.com/automations/schema/reference/entity/sht_device/color_absolute_command
   colorAbsolute('Set Color', 'device.command.ColorAbsolute'),
@@ -786,8 +775,7 @@ enum ActionType {
   setFanSpeed('Set Fan Speed', 'device.command.SetFanSpeed'),
 
   /// https://developers.home.google.com/automations/schema/reference/entity/sht_device/set_fan_speed_relative_command
-  setFanSpeedRelative(
-      'Adjust Fan Speed', 'device.command.SetFanSpeedRelative'),
+  setFanSpeedRelative('Adjust Fan Speed', 'device.command.SetFanSpeedRelative'),
 
   /// https://developers.home.google.com/automations/schema/reference/entity/sht_device/reverse_fan_command
   reverseFan('Reverse Fan', 'device.command.ReverseFan'),
@@ -984,16 +972,16 @@ enum ActionType {
         const AssistantCommandAction(command: 'Play relaxing music'),
       ActionType.onOff =>
         const OnOffAction(devices: ['Light - Living Room'], on: true),
-      ActionType.activateScene =>
-        const ActivateSceneAction(scene: 'Relaxation Scene - Living Room', activate: true),
-      ActionType.brightnessAbsolute =>
-        const BrightnessAbsoluteAction(devices: ['Light - Living Room'], brightness: 50),
+      ActionType.activateScene => const ActivateSceneAction(
+          scene: 'Relaxation Scene - Living Room', activate: true),
+      ActionType.brightnessAbsolute => const BrightnessAbsoluteAction(
+          devices: ['Light - Living Room'], brightness: 50),
       ActionType.brightnessRelative => const BrightnessRelativeAction(
           devices: ['Light - Living Room'], brightnessRelativePercent: 10),
-      ActionType.colorAbsolute =>
-        const ColorAbsoluteAction(devices: ['Light - Living Room'], temperature: 2700),
-      ActionType.setVolume =>
-        const SetVolumeAction(devices: ['Speaker - Living Room'], volumeLevel: 30),
+      ActionType.colorAbsolute => const ColorAbsoluteAction(
+          devices: ['Light - Living Room'], temperature: 2700),
+      ActionType.setVolume => const SetVolumeAction(
+          devices: ['Speaker - Living Room'], volumeLevel: 30),
       ActionType.mute =>
         const MuteAction(devices: ['Speaker - Living Room'], mute: true),
       ActionType.mediaNext =>
@@ -1012,36 +1000,37 @@ enum ActionType {
         const LockUnlockAction(devices: ['Front Door Lock'], lock: true),
       ActionType.armDisarm =>
         const ArmDisarmAction(devices: ['Home Security System'], arm: true),
-      ActionType.openClose =>
-        const OpenCloseAction(devices: ['Blinds - Living Room'], openPercent: 0),
+      ActionType.openClose => const OpenCloseAction(
+          devices: ['Blinds - Living Room'], openPercent: 0),
       ActionType.thermostatSetMode => const ThermostatSetModeAction(
           devices: ['Thermostat - Living Room'], thermostatMode: 'heat'),
       ActionType.thermostatTemperatureSetpoint =>
         const ThermostatTemperatureSetpointAction(
-            devices: ['Thermostat - Living Room'], thermostatTemperatureSetpoint: 21.0),
+            devices: ['Thermostat - Living Room'],
+            thermostatTemperatureSetpoint: 21.0),
       ActionType.thermostatTemperatureSetRange =>
         const ThermostatTemperatureSetRangeAction(
             devices: ['Thermostat - Living Room'],
             thermostatTemperatureSetpointHigh: 24.0,
             thermostatTemperatureSetpointLow: 18.0),
-      ActionType.setFanSpeed =>
-        const SetFanSpeedAction(devices: ['Ceiling Fan - Living Room'], fanSpeed: 'medium'),
+      ActionType.setFanSpeed => const SetFanSpeedAction(
+          devices: ['Ceiling Fan - Living Room'], fanSpeed: 'medium'),
       ActionType.setFanSpeedRelative => const SetFanSpeedRelativeAction(
           devices: ['Ceiling Fan - Living Room'], fanSpeedRelativePercent: 10),
       ActionType.reverseFan =>
         const ReverseFanAction(devices: ['Ceiling Fan - Living Room']),
-      ActionType.setHumidity =>
-        const SetHumidityAction(devices: ['Humidifier - Bedroom'], humidity: 50),
+      ActionType.setHumidity => const SetHumidityAction(
+          devices: ['Humidifier - Bedroom'], humidity: 50),
       ActionType.humidityRelative => const HumidityRelativeAction(
           devices: ['Humidifier - Bedroom'], relativeHumidityPercent: 10),
-      ActionType.startStop =>
-        const StartStopAction(devices: ['Robot Vacuum - Living Room'], start: true),
-      ActionType.pauseUnpause =>
-        const PauseUnpauseAction(devices: ['Washer - Laundry Room'], pause: true),
+      ActionType.startStop => const StartStopAction(
+          devices: ['Robot Vacuum - Living Room'], start: true),
+      ActionType.pauseUnpause => const PauseUnpauseAction(
+          devices: ['Washer - Laundry Room'], pause: true),
       ActionType.dock =>
         const DockAction(devices: ['Robot Vacuum - Living Room']),
-      ActionType.charge =>
-        const ChargeAction(devices: ['Robot Vacuum - Living Room'], charge: true),
+      ActionType.charge => const ChargeAction(
+          devices: ['Robot Vacuum - Living Room'], charge: true),
       ActionType.reboot => const RebootAction(devices: ['Router - Office']),
       ActionType.fill =>
         const FillAction(devices: ['Bathtub - Bathroom'], fill: true),
@@ -1053,14 +1042,14 @@ enum ActionType {
         const NextInputAction(devices: ['TV - Living Room']),
       ActionType.previousInput =>
         const PreviousInputAction(devices: ['TV - Living Room']),
-      ActionType.selectChannel =>
-        const SelectChannelAction(devices: ['TV - Living Room'], channelNumber: '123'),
-      ActionType.relativeChannel =>
-        const RelativeChannelAction(devices: ['TV - Living Room'], channelCount: 1),
+      ActionType.selectChannel => const SelectChannelAction(
+          devices: ['TV - Living Room'], channelNumber: '123'),
+      ActionType.relativeChannel => const RelativeChannelAction(
+          devices: ['TV - Living Room'], channelCount: 1),
       ActionType.returnChannel =>
         const ReturnChannelAction(devices: ['TV - Living Room']),
-      ActionType.rotateAbsolute =>
-        const RotateAbsoluteAction(devices: ['Blinds - Living Room'], rotationPercent: 50),
+      ActionType.rotateAbsolute => const RotateAbsoluteAction(
+          devices: ['Blinds - Living Room'], rotationPercent: 50),
       ActionType.timerStart =>
         const TimerStartAction(devices: ['Oven - Kitchen'], duration: '30m'),
       ActionType.timerAdjust =>
@@ -1071,28 +1060,29 @@ enum ActionType {
         const TimerResumeAction(devices: ['Oven - Kitchen']),
       ActionType.timerCancel =>
         const TimerCancelAction(devices: ['Oven - Kitchen']),
-      ActionType.lightEffectColorLoop =>
-        const LightEffectColorLoopAction(devices: ['Light - Living Room'], duration: '30m'),
-      ActionType.lightEffectPulse =>
-        const LightEffectPulseAction(devices: ['Light - Living Room'], duration: '10s'),
-      ActionType.lightEffectSleep =>
-        const LightEffectSleepAction(devices: ['Light - Bedroom'], duration: '30m'),
-      ActionType.lightEffectWake =>
-        const LightEffectWakeAction(devices: ['Light - Bedroom'], duration: '30m'),
+      ActionType.lightEffectColorLoop => const LightEffectColorLoopAction(
+          devices: ['Light - Living Room'], duration: '30m'),
+      ActionType.lightEffectPulse => const LightEffectPulseAction(
+          devices: ['Light - Living Room'], duration: '10s'),
+      ActionType.lightEffectSleep => const LightEffectSleepAction(
+          devices: ['Light - Bedroom'], duration: '30m'),
+      ActionType.lightEffectWake => const LightEffectWakeAction(
+          devices: ['Light - Bedroom'], duration: '30m'),
       ActionType.stopLightEffect =>
         const StopLightEffectAction(devices: ['Light - Living Room']),
-      ActionType.appSelect =>
-        const AppSelectAction(devices: ['Chromecast - Living Room'], applicationName: 'Netflix'),
-      ActionType.appInstall =>
-        const AppInstallAction(devices: ['Chromecast - Living Room'], newApplicationName: 'YouTube'),
-      ActionType.appSearch =>
-        const AppSearchAction(devices: ['Chromecast - Living Room'], applicationName: 'Netflix'),
-      ActionType.cook =>
-        const CookAction(devices: ['Oven - Kitchen'], start: true, cookingMode: 'BAKE'),
-      ActionType.dispense =>
-        const DispenseAction(devices: ['Water Dispenser - Kitchen'], item: 'water'),
+      ActionType.appSelect => const AppSelectAction(
+          devices: ['Chromecast - Living Room'], applicationName: 'Netflix'),
+      ActionType.appInstall => const AppInstallAction(
+          devices: ['Chromecast - Living Room'], newApplicationName: 'YouTube'),
+      ActionType.appSearch => const AppSearchAction(
+          devices: ['Chromecast - Living Room'], applicationName: 'Netflix'),
+      ActionType.cook => const CookAction(
+          devices: ['Oven - Kitchen'], start: true, cookingMode: 'BAKE'),
+      ActionType.dispense => const DispenseAction(
+          devices: ['Water Dispenser - Kitchen'], item: 'water'),
       ActionType.enableDisableGuestNetwork =>
-        const EnableDisableGuestNetworkAction(devices: ['Router - Office'], enable: true),
+        const EnableDisableGuestNetworkAction(
+            devices: ['Router - Office'], enable: true),
       ActionType.enableDisableNetworkProfile =>
         const EnableDisableNetworkProfileAction(
             devices: ['Router - Office'], enable: true, profile: 'Kids'),
