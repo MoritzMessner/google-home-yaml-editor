@@ -1,0 +1,88 @@
+# ------------------------------------------------------------------------------------------ #
+# Morgen Routine - Sanftes Aufwachen mit automatischer Beleuchtung
+# ------------------------------------------------------------------------------------------ #
+
+metadata:
+  name: Morgen Routine Wochentags
+  description: Sanftes Aufwachen an Wochentagen mit gradueller Beleuchtung im Schlafzimmer, Flur und Wohnzimmer.
+
+automations:
+  - starters:
+      - type: time.schedule
+        at: sunrise
+        weekdays:
+          - MONDAY
+          - TUESDAY
+          - WEDNESDAY
+          - THURSDAY
+          - FRIDAY
+
+    actions:
+      # Schlafzimmer sanft aufhellen
+      - type: device.command.OnOff
+        devices:
+          - Links - Schlafzimmer
+          - Rechts - Schlafzimmer
+        on: true
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Links - Schlafzimmer
+          - Rechts - Schlafzimmer
+        brightness: 10
+
+      # Graduelle Aufhellung über 10 Minuten
+      - type: device.command.LightEffectWake
+        devices:
+          - Links - Schlafzimmer
+          - Rechts - Schlafzimmer
+          - Bett - Schlafzimmer
+        duration: 10min
+        wakeBrightness: 80
+
+      # Warte 5 Minuten, dann Flur einschalten
+      - type: time.delay
+        for: 5min
+
+      - type: device.command.OnOff
+        devices:
+          - Flurlicht - Flur
+          - Licht 11 - Flur
+        on: true
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Flurlicht - Flur
+          - Licht 11 - Flur
+        brightness: 60
+
+      # Wohnzimmer vorbereiten
+      - type: device.command.OnOff
+        devices:
+          - Fensterlampe - Wohnzimmer
+          - Schreibtisch - Wohnzimmer
+        on: true
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Fensterlampe - Wohnzimmer
+          - Schreibtisch - Wohnzimmer
+        brightness: 40
+
+      # Warmes Licht für gemütliche Atmosphäre
+      - type: device.command.ColorAbsolute
+        devices:
+          - Fensterlampe - Wohnzimmer
+          - Schreibtisch - Wohnzimmer
+        color:
+          temperature: 3000
+
+      # Luftreiniger starten
+      - type: device.command.OnOff
+        devices:
+          - Luftreiniger - Wohnzimmer
+        on: true
+
+      # Nachricht abspielen
+      - type: assistant.command.Broadcast
+        message: "Guten Morgen! Die Lichter sind eingeschaltet und der Luftreiniger läuft."

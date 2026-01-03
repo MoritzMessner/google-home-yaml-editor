@@ -1,0 +1,84 @@
+# ------------------------------------------------------------------------------------------ #
+# Arbeitsplatz Fokus-Modus - Optimale Konzentration
+# ------------------------------------------------------------------------------------------ #
+
+metadata:
+  name: Fokus-Modus für Arbeit
+  description: Optimiert Beleuchtung am Schreibtisch und reduziert Ablenkungen während der Arbeit.
+
+automations:
+  - starters:
+      - type: assistant.event.OkGoogle
+        query: "Fokus-Modus"
+
+    condition:
+      type: time.between
+      after: "08:00"
+      before: "20:00"
+
+    actions:
+      # Schreibtisch optimal beleuchten
+      - type: device.command.OnOff
+        devices:
+          - Schreibtisch - Wohnzimmer
+        on: true
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Schreibtisch - Wohnzimmer
+        brightness: 100
+
+      # Tageslicht-Farbe für Konzentration
+      - type: device.command.ColorAbsolute
+        devices:
+          - Schreibtisch - Wohnzimmer
+        color:
+          temperature: 5500
+
+      # Wohnzimmer-Hauptlicht moderat
+      - type: device.command.OnOff
+        devices:
+          - Wohnzimmer - Wohnzimmer
+        on: true
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Wohnzimmerlicht - Wohnzimmer
+        brightness: 50
+
+      # Ablenkende Lichter ausschalten
+      - type: device.command.OnOff
+        devices:
+          - Lava - Wohnzimmer
+          - Klavier - Wohnzimmer
+          - Sofa - Wohnzimmer
+        on: false
+
+      # TV ausschalten
+      - type: device.command.OnOff
+        devices:
+          - Samsung The Frame 50 - Wohnzimmer
+        on: false
+
+      # Bildschirm einschalten
+      - type: device.command.OnOff
+        devices:
+          - Bildschirm - Wohnzimmer
+        on: true
+
+      # Luftreiniger für gute Luftqualität
+      - type: device.command.OnOff
+        devices:
+          - Luftreiniger - Wohnzimmer
+        on: true
+
+      # Küche abdunkeln
+      - type: device.command.OnOff
+        devices:
+          - Küche Lights - Küche
+          - Esstisch - Küche
+        on: false
+
+      # Bestätigung
+      - type: assistant.command.Broadcast
+        message: "Fokus-Modus aktiviert. Viel Erfolg bei der Arbeit!"

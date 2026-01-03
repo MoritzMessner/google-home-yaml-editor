@@ -1,0 +1,71 @@
+# ------------------------------------------------------------------------------------------ #
+# Filmabend - Kino-Atmosphäre im Wohnzimmer
+# ------------------------------------------------------------------------------------------ #
+
+metadata:
+  name: Filmabend Modus
+  description: Perfekte Kino-Atmosphäre mit Samsung The Frame TV und gedimmter Beleuchtung.
+
+automations:
+  - starters:
+      - type: assistant.event.OkGoogle
+        query: "Filmabend"
+
+    condition:
+      type: time.between
+      after: "18:00"
+      before: "23:59"
+
+    actions:
+      # TV einschalten
+      - type: device.command.OnOff
+        devices:
+          - Samsung The Frame 50 - Wohnzimmer
+        on: true
+
+      # Hauptbeleuchtung ausschalten
+      - type: device.command.OnOff
+        devices:
+          - Wohnzimmer Lights - Wohnzimmer
+        on: false
+
+      # Ambiente-Beleuchtung - sehr gedimmt
+      - type: device.command.OnOff
+        devices:
+          - Sofa - Wohnzimmer
+          - Lava - Wohnzimmer
+          - Fensterlampe - Wohnzimmer
+        on: true
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Sofa - Wohnzimmer
+          - Fensterlampe - Wohnzimmer
+        brightness: 5
+
+      # Schreibtisch als Hintergrundbeleuchtung
+      - type: device.command.OnOff
+        devices:
+          - Schreibtisch - Wohnzimmer
+        on: true
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Schreibtisch - Wohnzimmer
+        brightness: 15
+
+      # Klavier-Licht aus
+      - type: device.command.OnOff
+        devices:
+          - Klavier - Wohnzimmer
+        on: false
+
+      # Luftreiniger ausschalten
+      - type: device.command.OnOff
+        devices:
+          - Luftreiniger - Wohnzimmer
+        on: false
+
+      # Bestätigung
+      - type: assistant.command.Broadcast
+        message: "Filmabend Modus aktiviert. Viel Spaß beim Film!"

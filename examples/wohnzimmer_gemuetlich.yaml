@@ -1,0 +1,105 @@
+# ------------------------------------------------------------------------------------------ #
+# Wohnzimmer Gemütlich - Ultra cozy atmosphere
+# ------------------------------------------------------------------------------------------ #
+
+metadata:
+  name: Wohnzimmer Gemütlich
+  description: Ultra cozy living room - warm colors and soft dimmed lighting.
+
+automations:
+  - starters:
+      - type: assistant.event.OkGoogle
+        eventData: query
+        is: "Wohnzimmer gemütlich"
+
+    actions:
+      # Wohnzimmerlicht (ceiling) - warm and dim for ambient overhead glow
+      - type: device.command.OnOff
+        devices:
+          - Wohzimmerlicht - Wohnzimmer
+        on: true
+
+      - type: device.command.ColorAbsolute
+        devices:
+          - Wohzimmerlicht - Wohnzimmer
+        color:
+          temperature: 2200K
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Wohzimmerlicht - Wohnzimmer
+        brightness: 15
+
+      # Klavier - more white/neutral for subtle accent
+      - type: device.command.OnOff
+        devices:
+          - Klavier - Wohnzimmer
+        on: true
+
+      - type: device.command.ColorAbsolute
+        devices:
+          - Klavier - Wohnzimmer
+        color:
+          temperature: 2700K
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Klavier - Wohnzimmer
+        brightness: 25
+
+      # Fensterlampe - warmest cozy glow
+      - type: device.command.OnOff
+        devices:
+          - Fensterlampe - Wohnzimmer
+        on: true
+
+      - type: device.command.ColorAbsolute
+        devices:
+          - Fensterlampe - Wohnzimmer
+        color:
+          temperature: 2200K
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Fensterlampe - Wohnzimmer
+        brightness: 25
+
+      # Sofa - warm and brighter (focus light)
+      - type: device.command.OnOff
+        devices:
+          - Sofa - Wohnzimmer
+        on: true
+
+      - type: device.command.ColorAbsolute
+        devices:
+          - Sofa - Wohnzimmer
+        color:
+          temperature: 2200K
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Sofa - Wohnzimmer
+        brightness: 40
+
+      # Schreibtisch - warm and slightly brighter
+      - type: device.command.OnOff
+        devices:
+          - Schreibtisch - Wohnzimmer
+        on: true
+
+      - type: device.command.ColorAbsolute
+        devices:
+          - Schreibtisch - Wohnzimmer
+        color:
+          temperature: 2200K
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Schreibtisch - Wohnzimmer
+        brightness: 35
+
+      # Lava lamp for extra cozy vibes
+      - type: device.command.OnOff
+        devices:
+          - Lava - Wohnzimmer
+        on: true

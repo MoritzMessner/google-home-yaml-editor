@@ -1,0 +1,101 @@
+# ------------------------------------------------------------------------------------------ #
+# Nachtmodus - Sanfte Beleuchtung für die Nacht
+# ------------------------------------------------------------------------------------------ #
+
+metadata:
+  name: Nachtmodus Aktivierung
+  description: Dimmt alle Lichter auf warme Farben und schaltet Geräte aus für die Nacht.
+
+automations:
+  - starters:
+      - type: assistant.event.OkGoogle
+        query: "Nachtmodus"
+
+    condition:
+      type: time.between
+      after: "21:00"
+      before: "06:00"
+
+    actions:
+      # Wohnzimmer auf Nachtbeleuchtung
+      - type: device.command.OnOff
+        devices:
+          - Wohnzimmer - Wohnzimmer
+          - Wohnzimmer Lights - Wohnzimmer
+          - Wohnzimmerlicht - Wohnzimmer
+          - Klavier - Wohnzimmer
+          - Schreibtisch - Wohnzimmer
+        on: false
+
+      # Nur Lava-Lampe als Nachtlicht
+      - type: device.command.OnOff
+        devices:
+          - Lava - Wohnzimmer
+        on: true
+
+      # Küche ausschalten
+      - type: device.command.OnOff
+        devices:
+          - Küche Lights - Küche
+          - Esstisch - Küche
+          - Komode - Küche
+        on: false
+
+      # Schlafzimmer auf Nachtlicht
+      - type: device.command.OnOff
+        devices:
+          - Bett - Schlafzimmer
+        on: true
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Bett - Schlafzimmer
+        brightness: 5
+
+      # Andere Schlafzimmer-Lichter aus
+      - type: device.command.OnOff
+        devices:
+          - Links - Schlafzimmer
+          - Rechts - Schlafzimmer
+        on: false
+
+      # Flur-Nachtlicht
+      - type: device.command.OnOff
+        devices:
+          - Flurlicht - Flur
+        on: true
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Flurlicht - Flur
+        brightness: 10
+
+      # Andere Flur-Lichter aus
+      - type: device.command.OnOff
+        devices:
+          - Flur Lights - Flur
+          - Licht 11 - Flur
+        on: false
+
+      # TV und Geräte ausschalten
+      - type: device.command.OnOff
+        devices:
+          - Samsung The Frame 50 - Wohnzimmer
+          - Bildschirm - Wohnzimmer
+        on: false
+
+      # Luftreiniger ausschalten
+      - type: device.command.OnOff
+        devices:
+          - Luftreiniger - Wohnzimmer
+        on: false
+
+      # Lautsprecher stumm
+      - type: device.command.Mute
+        devices:
+          - Küchenlautsprecher - Küche
+        mute: true
+
+      # Bestätigung
+      - type: assistant.command.Broadcast
+        message: "Nachtmodus aktiviert. Gute Nacht!"
