@@ -37,12 +37,27 @@ Unlock the full potential of your smart home with these examples. You can find t
 4. **Create New**: Click **+ Add new** and select **Script Editor**.
 5. **Paste & Save**: Paste your generated code into the editor, click **Validate**, and then **Activate** (or Save).
 
+## Resources & Codelabs
+
+- **[Official Google Home Scripting Codelab](https://developers.home.google.com/codelabs/create-a-scripted-automation)**: A great starting point for learning how to write scripts manually.
+- **[Google Home Developer Documentation](https://developers.home.google.com/automation/script-editor)**: The full reference for all available starters, conditions, and actions.
+- **[Supported Devices List](https://developers.home.google.com/automations/supported-devices)**: A comprehensive list of device types supported by the Script Editor.
+- **[Google Home Web (Automations)](https://home.google.com/automations)**: The web version of Google Home for automations.
+
 ## Common Automations
 
 Here are some popular ideas you can build:
 - **"Turn on lights when I arrive home"**: Use a `home.state.HomePresence` starter.
 - **"Dim lights at sunset"**: Use a `time.schedule` starter keying off `sunset`.
 - **"Flash lights when doorbell rings"**: Combine a device starter (Doorbell) with a repeated on/off action.
+
+## Referencing Devices
+
+When using devices in your scripts, you must reference them by their **exact name** as they appear in the Google Home app. 
+
+- **Case Sensitivity**: Names are case-sensitive. "Living Room Lamp" is different from "living room lamp".
+- **Quotes**: If your device name contains spaces or special characters, it is best practice to wrap it in quotes in your YAML (e.g., `- 'Living Room Light'`).
+- **Uniqueness**: Ensure your devices have unique names across your home to avoid ambiguity in the Script Editor.
 
 ## Supported Components
 

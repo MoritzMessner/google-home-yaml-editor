@@ -41,6 +41,15 @@ class _EditorScreenContent extends StatelessWidget {
         ),
         actions: [
           IconButton(
+            icon: const FaIcon(FontAwesomeIcons.google, size: 20),
+            tooltip: 'Open Google Home Web',
+            onPressed: () {
+              launchUrl(
+                Uri.parse('https://home.google.com/automations'),
+              );
+            },
+          ),
+          IconButton(
             icon: const FaIcon(FontAwesomeIcons.github, size: 20),
             tooltip: 'View on GitHub',
             onPressed: () {
