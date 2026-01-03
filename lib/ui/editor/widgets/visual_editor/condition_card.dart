@@ -26,6 +26,7 @@ class ConditionCard extends StatelessWidget {
     final currentType = ConditionType.fromCondition(condition!);
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Container(
         decoration: BoxDecoration(
           border: Border(
@@ -87,6 +88,7 @@ class ConditionCard extends StatelessWidget {
 
   Widget _buildAddConditionCard(BuildContext context) {
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Container(
         decoration: BoxDecoration(
           border: Border(

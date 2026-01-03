@@ -106,6 +106,7 @@ class _AutomationSection extends StatelessWidget {
         ),
         if (automation.actions.isEmpty)
           Card(
+            clipBehavior: Clip.antiAlias,
             child: Container(
               decoration: BoxDecoration(
                 border: Border(
@@ -168,6 +169,3 @@ class _AutomationSection extends StatelessWidget {
     );
   }
 }
-
-
-

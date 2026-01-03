@@ -25,6 +25,7 @@ class StarterCard extends StatelessWidget {
     final currentType = StarterType.fromStarter(starter);
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Container(
         decoration: BoxDecoration(
           border: Border(

@@ -23,6 +23,7 @@ class ActionCard extends StatelessWidget {
     final currentType = ActionType.fromAction(action);
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Container(
         decoration: BoxDecoration(
           border: Border(
@@ -206,15 +207,38 @@ class ActionCard extends StatelessWidget {
   }
 
   Widget _buildAssistantCommandFields(AssistantCommandAction a) {
-    return TextFormField(
-      key: ValueKey('${a.runtimeType}.command'),
-      initialValue: a.command,
-      decoration: const InputDecoration(
-        labelText: 'Command',
-        hintText: 'e.g., Play relaxing music',
-        isDense: true,
-      ),
-      onChanged: (v) => onChanged(AssistantCommandAction(command: v)),
+    return Column(
+      children: [
+        TextFormField(
+          key: ValueKey('${a.runtimeType}.devices'),
+          initialValue: a.devices.join(', '),
+          decoration: const InputDecoration(
+            labelText: 'Devices',
+            hintText: 'Comma-separated device names',
+            isDense: true,
+          ),
+          onChanged: (v) => onChanged(AssistantCommandAction(
+            devices: v
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList(),
+            command: a.command,
+          )),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          key: ValueKey('${a.runtimeType}.command'),
+          initialValue: a.command,
+          decoration: const InputDecoration(
+            labelText: 'Command',
+            hintText: 'e.g., Play relaxing music',
+            isDense: true,
+          ),
+          onChanged: (v) =>
+              onChanged(AssistantCommandAction(devices: a.devices, command: v)),
+        ),
+      ],
     );
   }
 

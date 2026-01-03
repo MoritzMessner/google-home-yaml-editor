@@ -3,15 +3,15 @@ import 'package:google_fonts/google_fonts.dart';
 
 /// App theme with a clean, functional dark aesthetic
 class AppTheme {
-  static const _background = Color(0xFF1E1E2E);
-  static const _surface = Color(0xFF2D2D3D);
-  static const _surfaceVariant = Color(0xFF3D3D4D);
-  static const _primary = Color(0xFF89B4FA);
-  static const _secondary = Color(0xFFA6E3A1);
-  static const _error = Color(0xFFF38BA8);
-  static const _warning = Color(0xFFFAB387);
-  static const _text = Color(0xFFCDD6F4);
-  static const _textMuted = Color(0xFF9399B2);
+  static const _background = Color(0xFF131314);
+  static const _surface = Color(0xFF1E1F20);
+  static const _surfaceVariant = Color(0xFF444746);
+  static const _primary = Color(0xFF8AB4F8);
+  static const _secondary = Color(0xFF81C995);
+  static const _error = Color(0xFFF28B82);
+  static const _warning = Color(0xFFFDD663);
+  static const _text = Color(0xFFE2E2E6);
+  static const _textMuted = Color(0xFFC4C7C5);
 
   static ThemeData get darkTheme {
     return ThemeData(
@@ -29,7 +29,7 @@ class AppTheme {
         onError: _background,
         surfaceContainerHighest: _surfaceVariant,
       ),
-      textTheme: GoogleFonts.jetBrainsMonoTextTheme(
+      textTheme: GoogleFonts.robotoTextTheme(
         ThemeData.dark().textTheme,
       ).apply(
         bodyColor: _text,
@@ -58,7 +58,8 @@ class AppTheme {
           borderRadius: BorderRadius.circular(6),
           borderSide: const BorderSide(color: _primary, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         labelStyle: const TextStyle(color: _textMuted),
         hintStyle: const TextStyle(color: _textMuted),
       ),
@@ -98,9 +99,9 @@ class AppTheme {
         thickness: 1,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: _surface,
+        backgroundColor: _background,
         elevation: 0,
-        titleTextStyle: GoogleFonts.jetBrainsMono(
+        titleTextStyle: GoogleFonts.outfit(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: _text,
@@ -111,9 +112,8 @@ class AppTheme {
   }
 
   // Semantic colors for the editor
-  static const Color starterColor = Color(0xFF89DCEB);
-  static const Color conditionColor = _warning;
-  static const Color actionColor = _secondary;
-  static const Color metadataColor = _primary;
+  static const Color starterColor = _primary; // Blue for starters
+  static const Color conditionColor = _warning; // Yellow for conditions
+  static const Color actionColor = _secondary; // Green for actions
+  static const Color metadataColor = _primary; // Blue for metadata
 }
-
