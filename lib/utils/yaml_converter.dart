@@ -119,7 +119,8 @@ class YamlConverter {
       // Assistant events
       case OkGoogleStarter(:final eventData):
         buffer.writeln('      - type: assistant.event.OkGoogle');
-        buffer.writeln('        query: ${_quote(eventData)}');
+        buffer.writeln('        eventData: query');
+        buffer.writeln('        is: ${_quote(eventData)}');
 
       // Time events
       case TimeScheduleStarter(:final at, :final weekdays):
@@ -394,8 +395,9 @@ class YamlConverter {
         buffer.writeln('      - type: assistant.command.Broadcast');
         buffer.writeln('        message: ${_quote(message)}');
 
-      case AssistantCommandAction(:final command):
+      case AssistantCommandAction(:final devices, :final command):
         buffer.writeln('      - type: assistant.command.OkGoogle');
+        _writeDevices(buffer, devices);
         buffer.writeln('        okGoogle: ${_quote(command)}');
 
       case OnOffAction(:final devices, :final on):
@@ -870,7 +872,12 @@ class YamlConverter {
     switch (type) {
       // Assistant events
       case 'assistant.event.OkGoogle':
-        return OkGoogleStarter(eventData: yaml['query']?.toString() ?? '');
+        // The command is stored in 'is' in correct YAML, but we map it to eventData in our model
+        return OkGoogleStarter(
+            eventData: yaml['is']?.toString() ??
+                yaml['eventData']?.toString() ??
+                yaml['query']?.toString() ??
+                '');
 
       // Time events
       case 'time.schedule':
@@ -1146,7 +1153,10 @@ class YamlConverter {
 
       case 'assistant.command.OkGoogle':
         return AssistantCommandAction(
-            command: yaml['okGoogle']?.toString() ?? '');
+            devices: devices,
+            command: yaml['okGoogle']?.toString() ??
+                yaml['command']?.toString() ??
+                '');
 
       case 'device.command.OnOff':
         return OnOffAction(

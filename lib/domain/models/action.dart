@@ -38,7 +38,11 @@ class BroadcastAction extends AutomationAction {
 /// https://developers.home.google.com/automations/schema/reference/entity/assistant/ok_google_command
 /// Last checked: 2024-12-19
 class AssistantCommandAction extends AutomationAction {
-  const AssistantCommandAction({required this.command});
+  const AssistantCommandAction({
+    required this.devices,
+    required this.command,
+  });
+  final List<String> devices;
   final String command;
 }
 
@@ -968,8 +972,8 @@ enum ActionType {
       ActionType.delay => const DelayAction(duration: '5s'),
       ActionType.broadcast =>
         const BroadcastAction(message: 'Someone is at the door'),
-      ActionType.assistantCommand =>
-        const AssistantCommandAction(command: 'Play relaxing music'),
+      ActionType.assistantCommand => const AssistantCommandAction(
+          devices: ['Speaker - Living Room'], command: 'Play relaxing music'),
       ActionType.onOff =>
         const OnOffAction(devices: ['Light - Living Room'], on: true),
       ActionType.activateScene => const ActivateSceneAction(

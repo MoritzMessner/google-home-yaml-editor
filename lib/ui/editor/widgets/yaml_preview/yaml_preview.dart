@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../view_model/editor_view_model.dart';
 
@@ -12,33 +13,35 @@ class YamlPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = context.watch<EditorViewModel>();
     final yaml = viewModel.yamlOutput;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Container(
-      color: const Color(0xFF252535),
+      margin: const EdgeInsets.only(right: 16, top: 16, bottom: 16),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color,
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Header
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Color(0xFF3D3D4D)),
-              ),
-            ),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.code,
                   size: 18,
-                  color: Color(0xFF89B4FA),
+                  color: colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
-                const Text(
+                Text(
                   'YAML Output',
-                  style: TextStyle(
+                  style: GoogleFonts.outfit(
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF89B4FA),
+                    color: colorScheme.primary,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -61,11 +64,10 @@ class YamlPreview extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: SelectableText(
                 yaml,
-                style: const TextStyle(
-                  fontFamily: 'JetBrains Mono',
+                style: GoogleFonts.jetBrainsMono(
                   fontSize: 13,
                   height: 1.5,
-                  color: Color(0xFFCDD6F4),
+                  color: colorScheme.onSurface,
                 ),
               ),
             ),
@@ -87,6 +89,3 @@ class YamlPreview extends StatelessWidget {
     );
   }
 }
-
-
-

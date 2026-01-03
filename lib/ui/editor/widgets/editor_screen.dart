@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -40,29 +41,94 @@ class _EditorScreenContent extends StatelessWidget {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const FaIcon(FontAwesomeIcons.github, size: 20),
-            tooltip: 'View on GitHub',
-            onPressed: () {
-              launchUrl(
-                Uri.parse(
-                    'https://github.com/MoritzMessner/google-home-yaml-editor'),
-              );
-            },
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: TextButton.icon(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF444746),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              icon: const FaIcon(FontAwesomeIcons.google, size: 16),
+              label: const Text('Google Home Web'),
+              onPressed: () {
+                launchUrl(
+                  Uri.parse('https://home.google.com/automations'),
+                );
+              },
+            ),
           ),
-          const SizedBox(width: 8),
-          TextButton.icon(
-            onPressed: () => _showImportDialog(context),
-            icon: const Icon(Icons.upload_file, size: 18),
-            label: const Text('Import YAML'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Tooltip(
+              message: 'Contribute or Issue',
+              child: TextButton.icon(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xFF444746),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                icon: const FaIcon(FontAwesomeIcons.github, size: 16),
+                label: const Text('GitHub'),
+                onPressed: () {
+                  launchUrl(
+                    Uri.parse(
+                        'https://github.com/MoritzMessner/google-home-yaml-editor'),
+                  );
+                },
+              ),
+            ),
           ),
-          const SizedBox(width: 8),
-          TextButton.icon(
-            onPressed: viewModel.newScript,
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('New'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: TextButton.icon(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF444746),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              icon: const Icon(Icons.help_outline, size: 18),
+              label: const Text('How to use'),
+              onPressed: () {
+                launchUrl(
+                  Uri.parse(
+                      'https://github.com/MoritzMessner/google-home-yaml-editor#how-to-use-with-google-home-script-editor'),
+                );
+              },
+            ),
           ),
-          const SizedBox(width: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: TextButton.icon(
+              onPressed: () => _showImportDialog(context),
+              icon: const Icon(Icons.upload_file, size: 18),
+              label: const Text('Import YAML'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF444746),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: TextButton.icon(
+              onPressed: viewModel.newScript,
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('New'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF444746),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
         ],
       ),
       body: LayoutBuilder(
@@ -75,11 +141,6 @@ class _EditorScreenContent extends StatelessWidget {
                 Expanded(
                   flex: 5,
                   child: Container(
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        right: BorderSide(color: Color(0xFF3D3D4D)),
-                      ),
-                    ),
                     child: const VisualEditor(),
                   ),
                 ),
@@ -145,8 +206,7 @@ class _EditorScreenContent extends StatelessWidget {
                 hintText: 'Paste your Google Home automation YAML here...',
                 border: OutlineInputBorder(),
               ),
-              style: const TextStyle(
-                fontFamily: 'JetBrains Mono',
+              style: GoogleFonts.jetBrainsMono(
                 fontSize: 13,
               ),
             ),
