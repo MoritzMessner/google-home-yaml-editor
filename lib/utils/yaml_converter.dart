@@ -1179,7 +1179,7 @@ class YamlConverter {
         return ColorAbsoluteAction(
           devices: devices,
           spectrumRGB: _parseInt(colorYaml?['spectrumRGB']),
-          temperature: _parseInt(colorYaml?['temperature']),
+          temperature: _parseColorTemperature(colorYaml?['temperature']),
         );
 
       case 'device.command.SetVolume':
@@ -1484,6 +1484,18 @@ class YamlConverter {
     if (value is double) return value;
     if (value is int) return value.toDouble();
     if (value is String) return double.tryParse(value);
+    return null;
+  }
+
+  static int? _parseColorTemperature(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) {
+      if (value.toUpperCase().endsWith('K')) {
+        return int.tryParse(value.substring(0, value.length - 1));
+      }
+      return int.tryParse(value);
+    }
     return null;
   }
 }

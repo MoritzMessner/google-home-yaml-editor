@@ -1,0 +1,113 @@
+# ------------------------------------------------------------------------------------------ #
+# Romantischer Abend - Stimmungsvolle Atmosphäre
+# ------------------------------------------------------------------------------------------ #
+
+metadata:
+  name: Romantischer Abend Modus
+  description: Schafft eine romantische Atmosphäre mit gedimmter Beleuchtung, warmen Farben und Musik.
+
+automations:
+  - starters:
+      - type: assistant.event.OkGoogle
+        query: "Romantischer Abend"
+
+    condition:
+      type: time.between
+      after: "18:00"
+      before: "23:59"
+
+    actions:
+      # Hauptlichter ausschalten
+      - type: device.command.OnOff
+        devices:
+          - Wohnzimmer Lights - Wohnzimmer
+          - Wohnzimmerlicht - Wohnzimmer
+          - Küche Lights - Küche
+        on: false
+
+      # Ambiente-Beleuchtung im Wohnzimmer
+      - type: device.command.OnOff
+        devices:
+          - Sofa - Wohnzimmer
+          - Fensterlampe - Wohnzimmer
+          - Lava - Wohnzimmer
+        on: true
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Sofa - Wohnzimmer
+          - Fensterlampe - Wohnzimmer
+        brightness: 15
+
+      # Warme romantische Farben
+      - type: device.command.ColorAbsolute
+        devices:
+          - Sofa - Wohnzimmer
+          - Fensterlampe - Wohnzimmer
+        color:
+          temperature: 2200
+
+      # Esstisch-Beleuchtung für Dinner
+      - type: device.command.OnOff
+        devices:
+          - Esstisch - Küche
+        on: true
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Esstisch - Küche
+        brightness: 25
+
+      # Komode als Akzentlicht
+      - type: device.command.OnOff
+        devices:
+          - Komode - Küche
+        on: true
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Komode - Küche
+        brightness: 20
+
+      # Klavier-Licht für Ambiente
+      - type: device.command.OnOff
+        devices:
+          - Klavier - Wohnzimmer
+        on: true
+
+      - type: device.command.BrightnessAbsolute
+        devices:
+          - Klavier - Wohnzimmer
+        brightness: 10
+
+      # Schreibtisch aus
+      - type: device.command.OnOff
+        devices:
+          - Schreibtisch - Wohnzimmer
+          - Bildschirm - Wohnzimmer
+        on: false
+
+      # TV aus
+      - type: device.command.OnOff
+        devices:
+          - Samsung The Frame 50 - Wohnzimmer
+        on: false
+
+      # Romantische Musik
+      - type: assistant.command.OkGoogle
+        okGoogle: "Spiele romantische Musik"
+
+      - type: device.command.SetVolume
+        devices:
+          - Küchenlautsprecher - Küche
+        volumeLevel: 25
+
+      # Luftreiniger leise
+      - type: device.command.OnOff
+        devices:
+          - Luftreiniger - Wohnzimmer
+        on: true
+
+      # Bestätigung
+      - type: assistant.command.Broadcast
+        message: "Romantischer Abend aktiviert. Genießt die Zeit zusammen!"

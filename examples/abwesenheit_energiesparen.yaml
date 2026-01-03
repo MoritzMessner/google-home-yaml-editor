@@ -1,0 +1,74 @@
+# ------------------------------------------------------------------------------------------ #
+# Abwesenheitsmodus - Intelligentes Energiesparen
+# ------------------------------------------------------------------------------------------ #
+
+metadata:
+  name: Energiesparen bei Abwesenheit
+  description: Schaltet automatisch alle Lichter und Geräte aus wenn niemand zu Hause ist.
+
+automations:
+  - starters:
+      - type: home.state.HomePresence
+        state: homePresenceMode
+        is: AWAY
+
+    actions:
+      # Alle Wohnzimmer-Lichter aus
+      - type: device.command.OnOff
+        devices:
+          - Wohnzimmer - Wohnzimmer
+          - Wohnzimmer Lights - Wohnzimmer
+          - Wohnzimmerlicht - Wohnzimmer
+          - Sofa - Wohnzimmer
+          - Fensterlampe - Wohnzimmer
+          - Schreibtisch - Wohnzimmer
+          - Klavier - Wohnzimmer
+          - Lava - Wohnzimmer
+        on: false
+
+      # Alle Schlafzimmer-Lichter aus
+      - type: device.command.OnOff
+        devices:
+          - Schlafzimmer Lights - Schlafzimmer
+          - Bett - Schlafzimmer
+          - Links - Schlafzimmer
+          - Rechts - Schlafzimmer
+        on: false
+
+      # Alle Küchen-Lichter aus
+      - type: device.command.OnOff
+        devices:
+          - Küche Lights - Küche
+          - Esstisch - Küche
+          - Komode - Küche
+        on: false
+
+      # Alle Flur-Lichter aus
+      - type: device.command.OnOff
+        devices:
+          - Flur Lights - Flur
+          - Flurlicht - Flur
+          - Licht 11 - Flur
+        on: false
+
+      # TV und Bildschirm ausschalten
+      - type: device.command.OnOff
+        devices:
+          - Samsung The Frame 50 - Wohnzimmer
+          - Bildschirm - Wohnzimmer
+        on: false
+
+      # Luftreiniger ausschalten
+      - type: device.command.OnOff
+        devices:
+          - Luftreiniger - Wohnzimmer
+        on: false
+
+      # S8 Staubsauger zum Dock schicken
+      - type: device.command.Dock
+        devices:
+          - S8 - Küche
+
+      # Bestätigung
+      - type: assistant.command.Broadcast
+        message: "Abwesenheitsmodus aktiviert. Alle Lichter und Geräte wurden ausgeschaltet."
