@@ -69,6 +69,3 @@ class MetadataCard extends StatelessWidget {
     );
   }
 }
-
-
-

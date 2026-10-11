@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../domain/models/condition.dart'; // Added for HomePresenceMode
 import '../../../../domain/models/starter.dart';
+import '../../../../utils/state_value.dart';
 import '../../../core/themes/app_theme.dart';
 import 'weekday_selector.dart';
 
@@ -377,7 +378,7 @@ class StarterCard extends StatelessWidget {
                   isDense: true,
                 ),
                 onChanged: (v) => onChanged(TemperatureSettingStarter(
-                    device: s.device, state: s.state, is_: v)),
+                    device: s.device, state: s.state, is_: parseStateValue(v))),
               ),
             ),
           ],
@@ -492,7 +493,7 @@ class StarterCard extends StatelessWidget {
                   isDense: true,
                 ),
                 onChanged: (v) => onChanged(EnergyStorageStateStarter(
-                    device: s.device, state: s.state, is_: v)),
+                    device: s.device, state: s.state, is_: parseStateValue(v))),
               ),
             ),
           ],
@@ -537,7 +538,7 @@ class StarterCard extends StatelessWidget {
                   isDense: true,
                 ),
                 onChanged: (v) => onChanged(TimerStateStarter(
-                    device: s.device, state: s.state, is_: v)),
+                    device: s.device, state: s.state, is_: parseStateValue(v))),
               ),
             ),
           ],
@@ -581,7 +582,7 @@ class StarterCard extends StatelessWidget {
                   isDense: true,
                 ),
                 onChanged: (v) => onChanged(DeviceStateStarter(
-                    device: s.device, state: s.state, is_: v)),
+                    device: s.device, state: s.state, is_: parseStateValue(v))),
               ),
             ),
           ],

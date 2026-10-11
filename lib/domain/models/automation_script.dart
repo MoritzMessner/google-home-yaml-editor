@@ -1,5 +1,6 @@
 /// Core automation script models
 /// Based on https://developers.home.google.com/automations/starters-conditions-and-actions
+library;
 
 import 'action.dart';
 import 'condition.dart';
@@ -18,13 +19,13 @@ class AutomationScript {
   final Metadata metadata;
   final List<Automation> automations;
 
-  factory AutomationScript.empty() => AutomationScript(
-        metadata: const Metadata(name: '', description: ''),
+  factory AutomationScript.empty() => const AutomationScript(
+        metadata: Metadata(name: '', description: ''),
         automations: [
           Automation(
-            starters: const [OkGoogleStarter()],
+            starters: [OkGoogleStarter()],
             condition: null,
-            actions: const [],
+            actions: [],
           ),
         ],
       );

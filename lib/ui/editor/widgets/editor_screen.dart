@@ -33,11 +33,11 @@ class _EditorScreenContent extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
+        title: const Row(
           children: [
-            const Icon(Icons.home, size: 22),
-            const SizedBox(width: 8),
-            const Text('Google Home Script Editor'),
+            Icon(Icons.home, size: 22),
+            SizedBox(width: 8),
+            Text('Google Home Script Editor'),
           ],
         ),
         actions: [
@@ -135,17 +135,15 @@ class _EditorScreenContent extends StatelessWidget {
         builder: (context, constraints) {
           // Use side-by-side layout for wider screens
           if (constraints.maxWidth >= 800) {
-            return Row(
+            return const Row(
               children: [
                 // Visual editor (left panel)
                 Expanded(
                   flex: 5,
-                  child: Container(
-                    child: const VisualEditor(),
-                  ),
+                  child: VisualEditor(),
                 ),
                 // YAML preview (right panel)
-                const Expanded(
+                Expanded(
                   flex: 4,
                   child: YamlPreview(),
                 ),
@@ -153,17 +151,17 @@ class _EditorScreenContent extends StatelessWidget {
             );
           } else {
             // Tab layout for narrower screens
-            return DefaultTabController(
+            return const DefaultTabController(
               length: 2,
               child: Column(
                 children: [
-                  const TabBar(
+                  TabBar(
                     tabs: [
                       Tab(text: 'Visual Editor'),
                       Tab(text: 'YAML'),
                     ],
                   ),
-                  const Expanded(
+                  Expanded(
                     child: TabBarView(
                       children: [
                         VisualEditor(),
@@ -222,10 +220,10 @@ class _EditorScreenContent extends StatelessWidget {
                 Navigator.pop(dialogContext);
                 if (!success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
+                    SnackBar(
+                      content: Text(viewModel.parseError ??
                           'Failed to parse YAML. Please check the format.'),
-                      backgroundColor: Color(0xFFF38BA8),
+                      backgroundColor: const Color(0xFFF38BA8),
                     ),
                   );
                 } else {

@@ -124,8 +124,8 @@ automations:
 | `device.command.ColorAbsolute` | `devices:`, `color: {name: "..."}` | Farbe setzen |
 | `time.delay` | `for: 5min` | Pause zwischen Aktionen |
 | `assistant.command.Broadcast` | `message:`, optional `devices:` | Durchsage |
-| `device.command.LightEffectWake` | `duration:`, `wakeBrightness:` | Sanft aufhellen |
-| `device.command.LightEffectSleep` | `duration:`, `sleepBrightness:` | Sanft dimmen |
+| `device.command.LightEffectWake` | `devices:`, `duration: 5min-1hour` | Sanft aufhellen |
+| `device.command.LightEffectSleep` | `devices:`, `duration: 5min-1hour` | Sanft dimmen |
 
 ### Wichtige Hinweise
 

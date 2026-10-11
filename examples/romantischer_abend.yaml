@@ -9,7 +9,8 @@ metadata:
 automations:
   - starters:
       - type: assistant.event.OkGoogle
-        query: "Romantischer Abend"
+        eventData: query
+        is: "Romantischer Abend"
 
     condition:
       type: time.between
@@ -45,7 +46,7 @@ automations:
           - Sofa - Wohnzimmer
           - Fensterlampe - Wohnzimmer
         color:
-          temperature: 2200
+          temperature: 2200K
 
       # Esstisch-Beleuchtung für Dinner
       - type: device.command.OnOff
@@ -95,6 +96,8 @@ automations:
 
       # Romantische Musik
       - type: assistant.command.OkGoogle
+        devices:
+          - Küchenlautsprecher - Küche
         okGoogle: "Spiele romantische Musik"
 
       - type: device.command.SetVolume
