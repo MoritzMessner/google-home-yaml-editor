@@ -66,6 +66,11 @@ void main() {
     'tab\there',
     'Lamp, Kitchen',
     'Lamp ?',
+    'zero\u0000width',
+    'next\u0085line',
+    'c1\u009Fcontrol',
+    'byte\uFEFForder',
+    'non\uFFFEchar',
   ];
 
   group('YamlConverter quoting', () {
@@ -246,5 +251,14 @@ Object? _normalize(Object? node) => switch (node) {
       _ => node.toString(),
     };
 
-String _describe(String value) =>
-    '"${value.replaceAll('\n', r'\n').replaceAll('\t', r'\t')}"';
+/// Test name for [value] with invisible characters spelled out.
+String _describe(String value) {
+  final visible = value.runes.map((rune) {
+    final invisible =
+        rune < 0x20 || (rune >= 0x7F && rune <= 0x9F) || rune >= 0xFEFF;
+    return invisible
+        ? '\\u{${rune.toRadixString(16)}}'
+        : String.fromCharCode(rune);
+  }).join();
+  return '"$visible"';
+}
