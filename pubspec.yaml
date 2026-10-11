@@ -11,14 +11,14 @@ dependencies:
     sdk: flutter
   provider: ^6.1.1
   yaml: ^3.1.2
-  google_fonts: ^6.1.0
+  google_fonts: ^8.2.1
   url_launcher: ^6.3.2
-  font_awesome_flutter: ^10.12.0
+  font_awesome_flutter: ^11.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.1
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

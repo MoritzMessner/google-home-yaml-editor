@@ -1,8 +1,6 @@
 import 'package:yaml/yaml.dart';
 
 import '../domain/models/automation.dart';
-import '../domain/models/condition.dart';
-import '../domain/models/starter.dart';
 
 /// Converts between AutomationScript and YAML format
 class YamlConverter {
@@ -14,14 +12,19 @@ class YamlConverter {
 
     // Metadata
     buffer.writeln('metadata:');
-    buffer.writeln('  name: ${script.metadata.name}');
-    buffer.writeln('  description: ${script.metadata.description}');
+    buffer.writeln('  name: ${_quote(script.metadata.name)}');
+    buffer.writeln('  description: ${_quote(script.metadata.description)}');
     buffer.writeln();
 
     // Automations
     buffer.writeln('automations:');
     for (final automation in script.automations) {
-      buffer.writeln('  - starters:');
+      if (automation.name case final name? when name.isNotEmpty) {
+        buffer.writeln('  - name: ${_quote(name)}');
+        buffer.writeln('    starters:');
+      } else {
+        buffer.writeln('  - starters:');
+      }
       for (final starter in automation.starters) {
         _writeStarter(buffer, starter);
       }
@@ -40,8 +43,39 @@ class YamlConverter {
     return buffer.toString();
   }
 
-  /// Parse YAML string to AutomationScript
-  static AutomationScript? fromYaml(String yaml) {
+  /// Comparison and timing fields the editor does not support. They are
+  /// ignored on import, so the user is warned about them.
+  static const _unsupportedFields = [
+    'isNot',
+    'greaterThan',
+    'greaterThanOrEqualTo',
+    'lessThan',
+    'lessThanOrEqualTo',
+    'for',
+    'suppressFor',
+  ];
+
+  /// Parse YAML string to AutomationScript.
+  ///
+  /// Returns `null` if [yaml] cannot be parsed. [onError] receives the
+  /// underlying error so callers can show a meaningful message.
+  /// [onWarning] receives a message for every part of the script that the
+  /// editor does not support and therefore dropped or ignored.
+  static AutomationScript? fromYaml(
+    String yaml, {
+    void Function(Object error)? onError,
+    void Function(String warning)? onWarning,
+  }) {
+    void warnUnsupportedFields(YamlMap item, String kind) {
+      final type = item['type'];
+      for (final field in _unsupportedFields) {
+        if (item.containsKey(field)) {
+          onWarning?.call('`$field` on $kind $type is not supported and was '
+              'ignored.');
+        }
+      }
+    }
+
     try {
       final doc = loadYaml(yaml) as YamlMap?;
       if (doc == null) return null;
@@ -63,7 +97,13 @@ class YamlConverter {
           if (startersYaml != null) {
             for (final starterYaml in startersYaml) {
               final starter = _parseStarter(starterYaml as YamlMap);
-              if (starter != null) starters.add(starter);
+              if (starter != null) {
+                starters.add(starter);
+                warnUnsupportedFields(starterYaml, 'starter');
+              } else {
+                onWarning?.call('Starter type ${starterYaml['type']} is not '
+                    'supported and was dropped.');
+              }
             }
           }
 
@@ -74,6 +114,14 @@ class YamlConverter {
           final conditionYaml = automationYaml['condition'] as YamlMap?;
           final condition =
               conditionYaml != null ? _parseCondition(conditionYaml) : null;
+          if (conditionYaml != null) {
+            if (condition == null) {
+              onWarning?.call('Condition type ${conditionYaml['type']} is '
+                  'not supported and was dropped.');
+            } else {
+              warnUnsupportedFields(conditionYaml, 'condition');
+            }
+          }
 
           final actionsYaml = automationYaml['actions'] as YamlList?;
           final actions = <AutomationAction>[];
@@ -81,11 +129,17 @@ class YamlConverter {
           if (actionsYaml != null) {
             for (final actionYaml in actionsYaml) {
               final action = _parseAction(actionYaml as YamlMap);
-              if (action != null) actions.add(action);
+              if (action != null) {
+                actions.add(action);
+              } else {
+                onWarning?.call('Action type ${actionYaml['type']} is not '
+                    'supported and was dropped.');
+              }
             }
           }
 
           automations.add(Automation(
+            name: automationYaml['name']?.toString(),
             starters: starters,
             condition: condition,
             actions: actions,
@@ -106,6 +160,7 @@ class YamlConverter {
         automations: automations,
       );
     } catch (e) {
+      onError?.call(e);
       return null;
     }
   }
@@ -125,7 +180,7 @@ class YamlConverter {
       // Time events
       case TimeScheduleStarter(:final at, :final weekdays):
         buffer.writeln('      - type: time.schedule');
-        buffer.writeln('        at: $at');
+        buffer.writeln('        at: ${_quote(at)}');
         if (weekdays != null && weekdays.isNotEmpty) {
           buffer.writeln('        weekdays:');
           for (final day in weekdays) {
@@ -136,7 +191,7 @@ class YamlConverter {
       // Home state
       case HomePresenceStarter(:final state, :final is_):
         buffer.writeln('      - type: home.state.HomePresence');
-        buffer.writeln('        state: $state');
+        buffer.writeln('        state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
       // Device events
@@ -208,7 +263,7 @@ class YamlConverter {
       case TemperatureSettingStarter(:final device, :final state, :final is_):
         buffer.writeln('      - type: device.state.TemperatureSetting');
         buffer.writeln('        device: ${_quote(device)}');
-        buffer.writeln('        state: $state');
+        buffer.writeln('        state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
       case MotionDetectionStateStarter(:final device, :final is_):
@@ -226,19 +281,24 @@ class YamlConverter {
       case EnergyStorageStateStarter(:final device, :final state, :final is_):
         buffer.writeln('      - type: device.state.EnergyStorage');
         buffer.writeln('        device: ${_quote(device)}');
-        buffer.writeln('        state: $state');
+        buffer.writeln('        state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
       case TimerStateStarter(:final device, :final state, :final is_):
         buffer.writeln('      - type: device.state.Timer');
         buffer.writeln('        device: ${_quote(device)}');
-        buffer.writeln('        state: $state');
+        buffer.writeln('        state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
-      case DeviceStateStarter(:final device, :final state, :final is_):
-        buffer.writeln('      - type: device.state');
+      case DeviceStateStarter(
+          :final type,
+          :final device,
+          :final state,
+          :final is_
+        ):
+        buffer.writeln('      - type: $type');
         buffer.writeln('        device: ${_quote(device)}');
-        buffer.writeln('        state: $state');
+        buffer.writeln('        state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
     }
   }
@@ -249,8 +309,12 @@ class YamlConverter {
     switch (condition) {
       case TimeBetweenCondition(:final after, :final before, :final weekdays):
         buffer.writeln('${prefix}type: time.between');
-        if (after != null) buffer.writeln('${prefix}after: $after');
-        if (before != null) buffer.writeln('${prefix}before: $before');
+        if (after != null) {
+          buffer.writeln('${prefix}after: ${_quote(after)}');
+        }
+        if (before != null) {
+          buffer.writeln('${prefix}before: ${_quote(before)}');
+        }
         if (weekdays != null && weekdays.isNotEmpty) {
           buffer.writeln('${prefix}weekdays:');
           for (final day in weekdays) {
@@ -260,7 +324,7 @@ class YamlConverter {
 
       case HomePresenceCondition(:final state, :final is_):
         buffer.writeln('${prefix}type: home.state.HomePresence');
-        buffer.writeln('${prefix}state: $state');
+        buffer.writeln('${prefix}state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
       case OnOffCondition(:final device, :final is_):
@@ -278,7 +342,7 @@ class YamlConverter {
       case VolumeCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.Volume');
         buffer.writeln('${prefix}device: ${_quote(device)}');
-        buffer.writeln('${prefix}state: $state');
+        buffer.writeln('${prefix}state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
       case LockUnlockCondition(:final device, :final is_):
@@ -296,13 +360,13 @@ class YamlConverter {
       case TemperatureSettingCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.TemperatureSetting');
         buffer.writeln('${prefix}device: ${_quote(device)}');
-        buffer.writeln('${prefix}state: $state');
+        buffer.writeln('${prefix}state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
       case ArmDisarmCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.ArmDisarm');
         buffer.writeln('${prefix}device: ${_quote(device)}');
-        buffer.writeln('${prefix}state: $state');
+        buffer.writeln('${prefix}state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
       case DockCondition(:final device, :final is_):
@@ -320,25 +384,25 @@ class YamlConverter {
       case FanSpeedCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.FanSpeed');
         buffer.writeln('${prefix}device: ${_quote(device)}');
-        buffer.writeln('${prefix}state: $state');
+        buffer.writeln('${prefix}state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
       case HumiditySettingCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.HumiditySetting');
         buffer.writeln('${prefix}device: ${_quote(device)}');
-        buffer.writeln('${prefix}state: $state');
+        buffer.writeln('${prefix}state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
       case FillCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.Fill');
         buffer.writeln('${prefix}device: ${_quote(device)}');
-        buffer.writeln('${prefix}state: $state');
+        buffer.writeln('${prefix}state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
       case EnergyStorageCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.EnergyStorage');
         buffer.writeln('${prefix}device: ${_quote(device)}');
-        buffer.writeln('${prefix}state: $state');
+        buffer.writeln('${prefix}state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
       case MotionDetectionCondition(:final device, :final is_):
@@ -362,25 +426,30 @@ class YamlConverter {
       case TimerCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.Timer');
         buffer.writeln('${prefix}device: ${_quote(device)}');
-        buffer.writeln('${prefix}state: $state');
+        buffer.writeln('${prefix}state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
       case MediaStateCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.MediaState');
         buffer.writeln('${prefix}device: ${_quote(device)}');
-        buffer.writeln('${prefix}state: $state');
+        buffer.writeln('${prefix}state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
       case SensorStateCondition(:final device, :final state, :final is_):
         buffer.writeln('${prefix}type: device.state.SensorState');
         buffer.writeln('${prefix}device: ${_quote(device)}');
-        buffer.writeln('${prefix}state: $state');
+        buffer.writeln('${prefix}state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case DeviceStateCondition(:final device, :final state, :final is_):
-        buffer.writeln('${prefix}type: device.state');
+      case DeviceStateCondition(
+          :final type,
+          :final device,
+          :final state,
+          :final is_
+        ):
+        buffer.writeln('${prefix}type: $type');
         buffer.writeln('${prefix}device: ${_quote(device)}');
-        buffer.writeln('${prefix}state: $state');
+        buffer.writeln('${prefix}state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
     }
   }
@@ -389,7 +458,7 @@ class YamlConverter {
     switch (action) {
       case DelayAction(:final duration):
         buffer.writeln('      - type: time.delay');
-        buffer.writeln('        for: $duration');
+        buffer.writeln('        for: ${_quote(duration)}');
 
       case BroadcastAction(:final message):
         buffer.writeln('      - type: assistant.command.Broadcast');
@@ -443,7 +512,7 @@ class YamlConverter {
           buffer.writeln('          spectrumRGB: $spectrumRGB');
         }
         if (temperature != null) {
-          buffer.writeln('          temperature: $temperature');
+          buffer.writeln('          temperature: ${temperature}K');
         }
 
       case SetVolumeAction(:final devices, :final volumeLevel):
@@ -684,12 +753,12 @@ class YamlConverter {
       case TimerStartAction(:final devices, :final duration):
         buffer.writeln('      - type: device.command.TimerStart');
         _writeDevices(buffer, devices);
-        buffer.writeln('        duration: $duration');
+        buffer.writeln('        duration: ${_quote(duration)}');
 
       case TimerAdjustAction(:final devices, :final duration):
         buffer.writeln('      - type: device.command.TimerAdjust');
         _writeDevices(buffer, devices);
-        buffer.writeln('        duration: $duration');
+        buffer.writeln('        duration: ${_quote(duration)}');
 
       case TimerPauseAction(:final devices):
         buffer.writeln('      - type: device.command.TimerPause');
@@ -707,28 +776,28 @@ class YamlConverter {
         buffer.writeln('      - type: device.command.LightEffectColorLoop');
         _writeDevices(buffer, devices);
         if (duration != null) {
-          buffer.writeln('        duration: $duration');
+          buffer.writeln('        duration: ${_quote(duration)}');
         }
 
       case LightEffectPulseAction(:final devices, :final duration):
         buffer.writeln('      - type: device.command.LightEffectPulse');
         _writeDevices(buffer, devices);
         if (duration != null) {
-          buffer.writeln('        duration: $duration');
+          buffer.writeln('        duration: ${_quote(duration)}');
         }
 
       case LightEffectSleepAction(:final devices, :final duration):
         buffer.writeln('      - type: device.command.LightEffectSleep');
         _writeDevices(buffer, devices);
         if (duration != null) {
-          buffer.writeln('        duration: $duration');
+          buffer.writeln('        duration: ${_quote(duration)}');
         }
 
       case LightEffectWakeAction(:final devices, :final duration):
         buffer.writeln('      - type: device.command.LightEffectWake');
         _writeDevices(buffer, devices);
         if (duration != null) {
-          buffer.writeln('        duration: $duration');
+          buffer.writeln('        duration: ${_quote(duration)}');
         }
 
       case StopLightEffectAction(:final devices):
@@ -830,20 +899,60 @@ class YamlConverter {
     }
   }
 
+  /// Scalars that YAML 1.1 or 1.2 would read as bool or null.
+  static const _reservedScalars = {
+    'true',
+    'false',
+    'yes',
+    'no',
+    'on',
+    'off',
+    'y',
+    'n',
+    'null',
+    '~',
+  };
+
+  /// Characters that start a non-plain YAML token when used first.
+  static const _indicatorChars = '-?:,[]{}#&*!|>\'"%@`';
+
+  /// Returns [value] as a YAML scalar that always parses back to the
+  /// same string. Plain style is used when safe, double quotes otherwise.
   static String _quote(String value) {
-    if (value.isEmpty) return '""';
-    if (value.contains(':') ||
-        value.contains('#') ||
-        value.contains("'") ||
-        value.contains('"') ||
-        value.contains('\n') ||
-        value.startsWith(' ') ||
-        value.endsWith(' ')) {
-      // Use double quotes and escape internal double quotes
-      final escaped = value.replaceAll('"', '\\"');
+    if (_needsQuotes(value)) {
+      final escaped = value
+          .replaceAll(r'\', r'\\')
+          .replaceAll('"', r'\"')
+          .replaceAll('\n', r'\n')
+          .replaceAll('\r', r'\r')
+          .replaceAll('\t', r'\t')
+          .replaceAllMapped(_nonPrintable, (m) {
+        final code = m[0]!.codeUnitAt(0);
+        return code <= 0xFF
+            ? '\\x${code.toRadixString(16).padLeft(2, '0')}'
+            : '\\u${code.toRadixString(16).padLeft(4, '0')}';
+      });
       return '"$escaped"';
     }
     return value;
+  }
+
+  /// Characters YAML does not allow unescaped in plain or quoted scalars.
+  static final _nonPrintable = RegExp(
+      '[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F-\\x9F\\uFEFF\\uFFFE\\uFFFF]');
+
+  static bool _needsQuotes(String value) {
+    if (value.isEmpty) return true;
+    if (value.trim() != value) return true;
+    if (_indicatorChars.contains(value[0])) return true;
+    if (value.contains(':') || value.contains('#')) return true;
+    if (value.contains(RegExp(r'[\t\n\r]'))) return true;
+    if (value.contains(_nonPrintable)) return true;
+    if (_reservedScalars.contains(value.toLowerCase())) return true;
+    // Numbers, dates, .inf/.nan and similar would not stay strings.
+    if (value.startsWith(RegExp(r'[-+]?\.?\d'))) return true;
+    if (value.startsWith('.')) return true;
+    return false;
   }
 
   static String _formatValue(dynamic value) {
@@ -983,7 +1092,8 @@ class YamlConverter {
       default:
         // Generic device state starter
         if (type?.startsWith('device.state') == true) {
-          return DeviceStateStarter(device: device, state: state, is_: isValue);
+          return DeviceStateStarter(
+              type: type!, device: device, state: state, is_: isValue);
         }
         return null;
     }
@@ -1134,7 +1244,7 @@ class YamlConverter {
         // Generic device state condition
         if (type?.startsWith('device.state') == true) {
           return DeviceStateCondition(
-              device: device, state: state, is_: isValue);
+              type: type!, device: device, state: state, is_: isValue);
         }
         return null;
     }

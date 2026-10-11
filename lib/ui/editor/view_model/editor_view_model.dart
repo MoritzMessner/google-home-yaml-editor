@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../../domain/models/automation.dart';
 import '../../../utils/yaml_converter.dart';
@@ -6,14 +7,49 @@ import '../../../utils/yaml_converter.dart';
 /// ViewModel for the automation script editor
 class EditorViewModel extends ChangeNotifier {
   EditorViewModel() {
-    _script = AutomationScript.empty();
+    _replaceScript(AutomationScript.empty());
   }
 
   late AutomationScript _script;
   AutomationScript get script => _script;
 
+  /// Incremented whenever the whole script is replaced (import, new script).
+  /// Widgets that hold their own field state use it as a key to rebuild.
+  int _revision = 0;
+  int get revision => _revision;
+
+  // Stable ids for list items, parallel to the model lists. List widgets use
+  // them as keys so field state follows its item when items are removed or
+  // reordered.
+  int _nextId = 0;
+  late List<List<int>> _starterIds;
+  late List<List<int>> _actionIds;
+
+  List<int> starterIds(int automationIndex) =>
+      List.unmodifiable(_starterIds[automationIndex]);
+
+  List<int> actionIds(int automationIndex) =>
+      List.unmodifiable(_actionIds[automationIndex]);
+
+  void _replaceScript(AutomationScript script) {
+    _script = script;
+    _starterIds = [
+      for (final automation in script.automations)
+        [for (final _ in automation.starters) _nextId++],
+    ];
+    _actionIds = [
+      for (final automation in script.automations)
+        [for (final _ in automation.actions) _nextId++],
+    ];
+    _revision++;
+  }
+
   String? _parseError;
   String? get parseError => _parseError;
+
+  /// Parts of the last imported script that were dropped or ignored.
+  List<String> _importWarnings = const [];
+  List<String> get importWarnings => _importWarnings;
 
   /// Get the YAML representation of the current script
   String get yamlOutput => YamlConverter.toYaml(_script);
@@ -53,6 +89,7 @@ class EditorViewModel extends ChangeNotifier {
     starters.add(const OkGoogleStarter());
     automations[automationIndex] = automation.copyWith(starters: starters);
     _script = _script.copyWith(automations: automations);
+    _starterIds[automationIndex].add(_nextId++);
     notifyListeners();
   }
 
@@ -64,6 +101,7 @@ class EditorViewModel extends ChangeNotifier {
     starters.removeAt(starterIndex);
     automations[automationIndex] = automation.copyWith(starters: starters);
     _script = _script.copyWith(automations: automations);
+    _starterIds[automationIndex].removeAt(starterIndex);
     notifyListeners();
   }
 
@@ -96,6 +134,7 @@ class EditorViewModel extends ChangeNotifier {
     actions.add(action);
     automations[automationIndex] = automation.copyWith(actions: actions);
     _script = _script.copyWith(automations: automations);
+    _actionIds[automationIndex].add(_nextId++);
     notifyListeners();
   }
 
@@ -117,35 +156,57 @@ class EditorViewModel extends ChangeNotifier {
     actions.removeAt(actionIndex);
     automations[automationIndex] = automation.copyWith(actions: actions);
     _script = _script.copyWith(automations: automations);
+    _actionIds[automationIndex].removeAt(actionIndex);
     notifyListeners();
   }
 
+  /// Moves the action at [oldIndex] so that it ends up at [newIndex].
   void moveAction(int automationIndex, int oldIndex, int newIndex) {
     final automations = List<Automation>.from(_script.automations);
     final automation = automations[automationIndex];
     final actions = List<AutomationAction>.from(automation.actions);
-    if (newIndex > oldIndex) newIndex--;
     final action = actions.removeAt(oldIndex);
     actions.insert(newIndex, action);
     automations[automationIndex] = automation.copyWith(actions: actions);
     _script = _script.copyWith(automations: automations);
+    final ids = _actionIds[automationIndex];
+    ids.insert(newIndex, ids.removeAt(oldIndex));
     notifyListeners();
   }
 
   // --- Import YAML ---
 
   bool importYaml(String yaml) {
-    final parsed = YamlConverter.fromYaml(yaml);
+    Object? error;
+    final warnings = <String>[];
+    final parsed = YamlConverter.fromYaml(
+      yaml,
+      onError: (e) => error = e,
+      onWarning: warnings.add,
+    );
     if (parsed != null) {
-      _script = parsed;
+      _replaceScript(parsed);
       _parseError = null;
+      _importWarnings = List.unmodifiable(warnings);
       notifyListeners();
       return true;
     } else {
-      _parseError = 'Failed to parse YAML. Please check the format.';
+      _parseError = _describeParseError(error);
       notifyListeners();
       return false;
     }
+  }
+
+  static String _describeParseError(Object? error) {
+    const prefix = 'Failed to parse YAML';
+    return switch (error) {
+      null => '$prefix. Please check the format.',
+      YamlException(:final message, :final span?) =>
+        '$prefix (line ${span.start.line + 1}): $message',
+      YamlException(:final message) => '$prefix: $message',
+      ArgumentError(:final message) => '$prefix: $message',
+      _ => '$prefix. Please check the format.',
+    };
   }
 
   void clearParseError() {
@@ -156,11 +217,9 @@ class EditorViewModel extends ChangeNotifier {
   // --- Reset ---
 
   void newScript() {
-    _script = AutomationScript.empty();
+    _replaceScript(AutomationScript.empty());
     _parseError = null;
+    _importWarnings = const [];
     notifyListeners();
   }
 }
-
-
-

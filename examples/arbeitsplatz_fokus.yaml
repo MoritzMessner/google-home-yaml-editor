@@ -9,7 +9,8 @@ metadata:
 automations:
   - starters:
       - type: assistant.event.OkGoogle
-        query: "Fokus-Modus"
+        eventData: query
+        is: "Fokus-Modus"
 
     condition:
       type: time.between
@@ -33,17 +34,17 @@ automations:
         devices:
           - Schreibtisch - Wohnzimmer
         color:
-          temperature: 5500
+          temperature: 4000K
 
       # Wohnzimmer-Hauptlicht moderat
       - type: device.command.OnOff
         devices:
-          - Wohnzimmer - Wohnzimmer
+          - Wohzimmerlicht - Wohnzimmer
         on: true
 
       - type: device.command.BrightnessAbsolute
         devices:
-          - Wohnzimmerlicht - Wohnzimmer
+          - Wohzimmerlicht - Wohnzimmer
         brightness: 50
 
       # Ablenkende Lichter ausschalten

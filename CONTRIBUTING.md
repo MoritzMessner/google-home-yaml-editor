@@ -25,7 +25,7 @@ To contribute code, please follow these steps:
     # or
     git checkout -b fix/bug-description
     ```
-4.  **Make your changes**. Please ensure your code follows the existing style and conventions.
+4.  **Make your changes**. Please ensure your code follows the existing style and conventions, and that `dart format`, `flutter analyze` and `flutter test` pass (see the [README](README.md#checks)). Add tests for new YAML types or bug fixes in `test/`.
 5.  **Commit your changes** with a clear and concise commit message.
 6.  **Push your branch** to the repository (or your fork).
 7.  **Open a Pull Request (PR)** targeting the **`develop`** branch.

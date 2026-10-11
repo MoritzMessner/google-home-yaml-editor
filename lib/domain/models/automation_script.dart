@@ -1,5 +1,6 @@
 /// Core automation script models
 /// Based on https://developers.home.google.com/automations/starters-conditions-and-actions
+library;
 
 import 'action.dart';
 import 'condition.dart';
@@ -18,13 +19,13 @@ class AutomationScript {
   final Metadata metadata;
   final List<Automation> automations;
 
-  factory AutomationScript.empty() => AutomationScript(
-        metadata: const Metadata(name: '', description: ''),
+  factory AutomationScript.empty() => const AutomationScript(
+        metadata: Metadata(name: '', description: ''),
         automations: [
           Automation(
-            starters: const [OkGoogleStarter()],
+            starters: [OkGoogleStarter()],
             condition: null,
-            actions: const [],
+            actions: [],
           ),
         ],
       );
@@ -63,11 +64,14 @@ class Metadata {
 
 class Automation {
   const Automation({
+    this.name,
     required this.starters,
     required this.condition,
     required this.actions,
   });
 
+  /// Optional name shown in the Google Home app for this automation.
+  final String? name;
   final List<Starter> starters;
   final Condition? condition;
   final List<AutomationAction> actions;
@@ -79,6 +83,7 @@ class Automation {
     bool clearCondition = false,
   }) {
     return Automation(
+      name: name,
       starters: starters ?? this.starters,
       condition: clearCondition ? null : (condition ?? this.condition),
       actions: actions ?? this.actions,

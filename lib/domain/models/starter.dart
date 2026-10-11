@@ -201,10 +201,14 @@ class SoundEventStarter extends Starter {
 /// Last checked: 2024-12-21
 class DeviceStateStarter extends Starter {
   const DeviceStateStarter({
+    this.type = 'device.state.OnOff',
     required this.device,
     required this.state,
     this.is_,
   });
+
+  /// Full starter type including the trait, e.g. `device.state.OnOff`.
+  final String type;
   final String device;
   final String state;
   final dynamic is_;

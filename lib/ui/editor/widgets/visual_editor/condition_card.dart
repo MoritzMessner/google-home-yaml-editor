@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../domain/models/condition.dart';
+import '../../../../utils/state_value.dart';
 import '../../../core/themes/app_theme.dart';
 import 'weekday_selector.dart';
 
@@ -45,7 +46,7 @@ class ConditionCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<ConditionType>(
-                      value: currentType,
+                      initialValue: currentType,
                       decoration: const InputDecoration(
                         labelText: 'Condition Type',
                         isDense: true,
@@ -163,7 +164,7 @@ class ConditionCard extends StatelessWidget {
           children: [
             Expanded(
               child: TextFormField(
-                key: ValueKey('timeBetween_after'),
+                key: const ValueKey('timeBetween_after'),
                 initialValue: c.after ?? '',
                 decoration: const InputDecoration(
                   labelText: 'After',
@@ -179,7 +180,7 @@ class ConditionCard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: TextFormField(
-                key: ValueKey('timeBetween_before'),
+                key: const ValueKey('timeBetween_before'),
                 initialValue: c.before ?? '',
                 decoration: const InputDecoration(
                   labelText: 'Before',
@@ -210,7 +211,7 @@ class ConditionCard extends StatelessWidget {
     return Column(
       children: [
         TextFormField(
-          key: ValueKey('homePresence_state'),
+          key: const ValueKey('homePresence_state'),
           initialValue: c.state,
           decoration: const InputDecoration(
             labelText: 'State',
@@ -224,7 +225,7 @@ class ConditionCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<HomePresenceMode>(
-          value: c.is_,
+          initialValue: c.is_,
           decoration: const InputDecoration(
             labelText: 'Is (Home/Away)',
             isDense: true,
@@ -261,7 +262,7 @@ class ConditionCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<bool>(
-          value: c.is_,
+          initialValue: c.is_,
           decoration: const InputDecoration(
             labelText: 'Is (On/Off)',
             isDense: true,
@@ -358,8 +359,9 @@ class ConditionCard extends StatelessWidget {
                 (v.toLowerCase() == 'true' || v.toLowerCase() == 'false')) {
               value = v.toLowerCase() == 'true'; // Then bool
             }
-            if (value == null && v.isNotEmpty)
+            if (value == null && v.isNotEmpty) {
               value = v; // Fallback to string if not empty
+            }
 
             onChanged(VolumeCondition(
               device: c.device,
@@ -389,7 +391,7 @@ class ConditionCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<bool>(
-          value: c.is_,
+          initialValue: c.is_,
           decoration: const InputDecoration(
             labelText: 'Is Locked',
             isDense: true,
@@ -482,8 +484,9 @@ class ConditionCard extends StatelessWidget {
           ),
           onChanged: (v) {
             dynamic value = double.tryParse(v);
-            if (value == null && v.isNotEmpty)
+            if (value == null && v.isNotEmpty) {
               value = v; // Fallback to string (likely mode)
+            }
 
             onChanged(TemperatureSettingCondition(
               device: c.device,
@@ -570,7 +573,7 @@ class ConditionCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<bool>(
-          value: c.is_,
+          initialValue: c.is_,
           decoration: const InputDecoration(
             labelText: 'Is Docked',
             isDense: true,
@@ -620,7 +623,7 @@ class ConditionCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<bool>(
-          value: c.is_,
+          initialValue: c.is_,
           decoration: const InputDecoration(
             labelText: 'Is (Value)',
             isDense: true,
@@ -729,7 +732,7 @@ class ConditionCard extends StatelessWidget {
           onChanged: (v) => onChanged(HumiditySettingCondition(
             device: c.device,
             state: c.state,
-            is_: v, // Kept dynamic as per model, likely int/double/string
+            is_: parseStateValue(v),
           )),
         ),
       ],
@@ -774,7 +777,7 @@ class ConditionCard extends StatelessWidget {
           onChanged: (v) => onChanged(FillCondition(
             device: c.device,
             state: c.state,
-            is_: v,
+            is_: parseStateValue(v),
           )),
         ),
       ],
@@ -853,7 +856,7 @@ class ConditionCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<bool>(
-          value: c.is_,
+          initialValue: c.is_,
           decoration: const InputDecoration(
             labelText: 'Is Motion Detected',
             isDense: true,
@@ -889,7 +892,7 @@ class ConditionCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<OccupancyState>(
-          value: c.is_,
+          initialValue: c.is_,
           decoration: const InputDecoration(
             labelText: 'Is',
             isDense: true,
@@ -927,7 +930,7 @@ class ConditionCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<bool>(
-          value: c.is_,
+          initialValue: c.is_,
           decoration: const InputDecoration(
             labelText: 'Is Online',
             isDense: true,
@@ -985,7 +988,7 @@ class ConditionCard extends StatelessWidget {
           onChanged: (v) => onChanged(TimerCondition(
             device: c.device,
             state: c.state,
-            is_: v,
+            is_: parseStateValue(v),
           )),
         ),
       ],
@@ -1023,7 +1026,7 @@ class ConditionCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<PlaybackState>(
-          value: c.is_,
+          initialValue: c.is_,
           decoration: const InputDecoration(
             labelText: 'Is (Playback State)',
             isDense: true,
@@ -1082,7 +1085,7 @@ class ConditionCard extends StatelessWidget {
           onChanged: (v) => onChanged(SensorStateCondition(
             device: c.device,
             state: c.state,
-            is_: v,
+            is_: parseStateValue(v),
           )),
         ),
       ],
@@ -1093,12 +1096,28 @@ class ConditionCard extends StatelessWidget {
     return Column(
       children: [
         TextFormField(
+          initialValue: c.type,
+          decoration: const InputDecoration(
+            labelText: 'Type',
+            hintText: 'e.g., device.state.OnOff',
+            isDense: true,
+          ),
+          onChanged: (v) => onChanged(DeviceStateCondition(
+            type: v,
+            device: c.device,
+            state: c.state,
+            is_: c.is_,
+          )),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
           initialValue: c.device,
           decoration: const InputDecoration(
             labelText: 'Device',
             isDense: true,
           ),
           onChanged: (v) => onChanged(DeviceStateCondition(
+            type: c.type,
             device: v,
             state: c.state,
             is_: c.is_,
@@ -1112,6 +1131,7 @@ class ConditionCard extends StatelessWidget {
             isDense: true,
           ),
           onChanged: (v) => onChanged(DeviceStateCondition(
+            type: c.type,
             device: c.device,
             state: v,
             is_: c.is_,
@@ -1125,9 +1145,10 @@ class ConditionCard extends StatelessWidget {
             isDense: true,
           ),
           onChanged: (v) => onChanged(DeviceStateCondition(
+            type: c.type,
             device: c.device,
             state: c.state,
-            is_: v,
+            is_: parseStateValue(v),
           )),
         ),
       ],

@@ -79,7 +79,7 @@ When using devices in your scripts, you must reference them by their **exact nam
 ## Getting Started for Developers
 
 ### Prerequisites
-- Flutter SDK (3.0.0 or higher)
+- Flutter SDK 3.44 or higher (CI uses 3.44.0)
 
 ### Run Locally
 
@@ -89,6 +89,16 @@ flutter pub get
 
 # Run on web
 flutter run -d chrome
+```
+
+### Checks
+
+CI runs these on every pull request, so run them before pushing:
+
+```bash
+dart format lib test
+flutter analyze
+flutter test
 ```
 
 ### Build for Production

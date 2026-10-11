@@ -11,11 +11,11 @@ automations:
       - type: time.schedule
         at: sunrise
         weekdays:
-          - MONDAY
-          - TUESDAY
-          - WEDNESDAY
-          - THURSDAY
-          - FRIDAY
+          - MON
+          - TUE
+          - WED
+          - THU
+          - FRI
 
     actions:
       # Schlafzimmer sanft aufhellen
@@ -38,7 +38,6 @@ automations:
           - Rechts - Schlafzimmer
           - Bett - Schlafzimmer
         duration: 10min
-        wakeBrightness: 80
 
       # Warte 5 Minuten, dann Flur einschalten
       - type: time.delay
@@ -47,13 +46,11 @@ automations:
       - type: device.command.OnOff
         devices:
           - Flurlicht - Flur
-          - Licht 11 - Flur
         on: true
 
       - type: device.command.BrightnessAbsolute
         devices:
           - Flurlicht - Flur
-          - Licht 11 - Flur
         brightness: 60
 
       # Wohnzimmer vorbereiten
@@ -75,7 +72,7 @@ automations:
           - Fensterlampe - Wohnzimmer
           - Schreibtisch - Wohnzimmer
         color:
-          temperature: 3000
+          temperature: 3000K
 
       # Luftreiniger starten
       - type: device.command.OnOff

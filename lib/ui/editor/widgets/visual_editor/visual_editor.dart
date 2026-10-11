@@ -20,6 +20,8 @@ class VisualEditor extends StatelessWidget {
     final script = viewModel.script;
 
     return ListView(
+      // A new revision means the script was replaced; drop all field state.
+      key: ValueKey(viewModel.revision),
       padding: const EdgeInsets.all(16),
       children: [
         // Metadata section
@@ -55,6 +57,8 @@ class _AutomationSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.read<EditorViewModel>();
+    final starterIds = viewModel.starterIds(automationIndex);
+    final actionIds = viewModel.actionIds(automationIndex);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -68,6 +72,7 @@ class _AutomationSection extends StatelessWidget {
         ),
         for (int i = 0; i < automation.starters.length; i++)
           Padding(
+            key: ValueKey(starterIds[i]),
             padding: const EdgeInsets.only(bottom: 8),
             child: StarterCard(
               starter: automation.starters[i],
@@ -148,11 +153,11 @@ class _AutomationSection extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: automation.actions.length,
-            onReorder: (oldIndex, newIndex) =>
+            onReorderItem: (oldIndex, newIndex) =>
                 viewModel.moveAction(automationIndex, oldIndex, newIndex),
             itemBuilder: (context, index) {
               return Padding(
-                key: ValueKey('action_$index'),
+                key: ValueKey(actionIds[index]),
                 padding: const EdgeInsets.only(bottom: 8),
                 child: ActionCard(
                   action: automation.actions[index],

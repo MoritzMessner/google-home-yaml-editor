@@ -1,5 +1,6 @@
 /// Condition models for Google Home automations
 /// Based on https://developers.home.google.com/automations/starters-conditions-and-actions
+library;
 
 // ============================================================================
 // Enums for State Values
@@ -55,10 +56,14 @@ enum Weekday {
   const Weekday(this.value);
   final String value;
 
+  /// Accepts both the short (`MON`) and the full (`MONDAY`) form,
+  /// case-insensitively, as documented in
+  /// https://developers.home.google.com/automations/schema/basics#weekday
   static Weekday? fromString(String? value) {
     if (value == null) return null;
+    final normalized = value.trim().toUpperCase();
     return Weekday.values.firstWhere(
-      (e) => e.value == value,
+      (e) => e.value == normalized || e.name.toUpperCase() == normalized,
       orElse: () => throw ArgumentError('Unknown Weekday: $value'),
     );
   }
@@ -175,10 +180,14 @@ class HomePresenceCondition extends Condition {
 /// Last checked: 2025-12-21
 class DeviceStateCondition extends Condition {
   const DeviceStateCondition({
+    this.type = 'device.state.OnOff',
     required this.device,
     required this.state,
     this.is_,
   });
+
+  /// Full condition type including the trait, e.g. `device.state.OnOff`.
+  final String type;
   final String device;
   final String state;
   final dynamic is_;
@@ -635,8 +644,8 @@ enum ConditionType {
           device: 'Smoke Detector',
           state: 'currentSensorStateData.SmokeLevel.currentSensorState',
           is_: 'smokeDetected'),
-      ConditionType.deviceState => const DeviceStateCondition(
-          device: 'Device', state: 'state', is_: 'value'),
+      ConditionType.deviceState =>
+        const DeviceStateCondition(device: 'Device', state: 'on', is_: true),
     };
   }
 }

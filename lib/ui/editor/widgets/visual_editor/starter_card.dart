@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../domain/models/condition.dart'; // Added for HomePresenceMode
 import '../../../../domain/models/starter.dart';
+import '../../../../utils/state_value.dart';
 import '../../../core/themes/app_theme.dart';
 import 'weekday_selector.dart';
 
@@ -377,7 +378,7 @@ class StarterCard extends StatelessWidget {
                   isDense: true,
                 ),
                 onChanged: (v) => onChanged(TemperatureSettingStarter(
-                    device: s.device, state: s.state, is_: v)),
+                    device: s.device, state: s.state, is_: parseStateValue(v))),
               ),
             ),
           ],
@@ -492,7 +493,7 @@ class StarterCard extends StatelessWidget {
                   isDense: true,
                 ),
                 onChanged: (v) => onChanged(EnergyStorageStateStarter(
-                    device: s.device, state: s.state, is_: v)),
+                    device: s.device, state: s.state, is_: parseStateValue(v))),
               ),
             ),
           ],
@@ -537,7 +538,7 @@ class StarterCard extends StatelessWidget {
                   isDense: true,
                 ),
                 onChanged: (v) => onChanged(TimerStateStarter(
-                    device: s.device, state: s.state, is_: v)),
+                    device: s.device, state: s.state, is_: parseStateValue(v))),
               ),
             ),
           ],
@@ -550,13 +551,24 @@ class StarterCard extends StatelessWidget {
     return Column(
       children: [
         TextFormField(
+          initialValue: s.type,
+          decoration: const InputDecoration(
+            labelText: 'Type',
+            hintText: 'e.g., device.state.OnOff',
+            isDense: true,
+          ),
+          onChanged: (v) => onChanged(DeviceStateStarter(
+              type: v, device: s.device, state: s.state, is_: s.is_)),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
           initialValue: s.device,
           decoration: const InputDecoration(
             labelText: 'Device',
             isDense: true,
           ),
-          onChanged: (v) => onChanged(
-              DeviceStateStarter(device: v, state: s.state, is_: s.is_)),
+          onChanged: (v) => onChanged(DeviceStateStarter(
+              type: s.type, device: v, state: s.state, is_: s.is_)),
         ),
         const SizedBox(height: 8),
         Row(
@@ -568,8 +580,8 @@ class StarterCard extends StatelessWidget {
                   labelText: 'State',
                   isDense: true,
                 ),
-                onChanged: (v) => onChanged(
-                    DeviceStateStarter(device: s.device, state: v, is_: s.is_)),
+                onChanged: (v) => onChanged(DeviceStateStarter(
+                    type: s.type, device: s.device, state: v, is_: s.is_)),
               ),
             ),
             const SizedBox(width: 12),
@@ -581,7 +593,10 @@ class StarterCard extends StatelessWidget {
                   isDense: true,
                 ),
                 onChanged: (v) => onChanged(DeviceStateStarter(
-                    device: s.device, state: s.state, is_: v)),
+                    type: s.type,
+                    device: s.device,
+                    state: s.state,
+                    is_: parseStateValue(v))),
               ),
             ),
           ],

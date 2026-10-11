@@ -9,7 +9,8 @@ metadata:
 automations:
   - starters:
       - type: assistant.event.OkGoogle
-        query: "Nachtmodus"
+        eventData: query
+        is: "Nachtmodus"
 
     condition:
       type: time.between
@@ -20,11 +21,11 @@ automations:
       # Wohnzimmer auf Nachtbeleuchtung
       - type: device.command.OnOff
         devices:
-          - Wohnzimmer - Wohnzimmer
           - Wohnzimmer Lights - Wohnzimmer
-          - Wohnzimmerlicht - Wohnzimmer
+          - Wohzimmerlicht - Wohnzimmer
           - Klavier - Wohnzimmer
           - Schreibtisch - Wohnzimmer
+          - Licht 11 - Wohnzimmer
         on: false
 
       # Nur Lava-Lampe als Nachtlicht
@@ -69,13 +70,6 @@ automations:
         devices:
           - Flurlicht - Flur
         brightness: 10
-
-      # Andere Flur-Lichter aus
-      - type: device.command.OnOff
-        devices:
-          - Flur Lights - Flur
-          - Licht 11 - Flur
-        on: false
 
       # TV und Geräte ausschalten
       - type: device.command.OnOff

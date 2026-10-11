@@ -48,11 +48,11 @@ class AppTheme {
         fillColor: _surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(6),
-          borderSide: BorderSide(color: _surfaceVariant),
+          borderSide: const BorderSide(color: _surfaceVariant),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(6),
-          borderSide: BorderSide(color: _surfaceVariant),
+          borderSide: const BorderSide(color: _surfaceVariant),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(6),
@@ -69,7 +69,7 @@ class AppTheme {
           fillColor: _surface,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(6),
-            borderSide: BorderSide(color: _surfaceVariant),
+            borderSide: const BorderSide(color: _surfaceVariant),
           ),
         ),
       ),

@@ -1,5 +1,6 @@
 /// Action models for Google Home automations
 /// Based on https://developers.home.google.com/automations/starters-conditions-and-actions
+library;
 
 // ============================================================================
 // Actions - Base class
