@@ -226,6 +226,19 @@ class _EditorScreenContent extends StatelessWidget {
                       backgroundColor: const Color(0xFFF38BA8),
                     ),
                   );
+                } else if (viewModel.importWarnings.isNotEmpty) {
+                  final warnings = viewModel.importWarnings;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'YAML imported with ${warnings.length} warning(s):\n'
+                        '${warnings.map((w) => '• $w').join('\n')}',
+                      ),
+                      backgroundColor: const Color(0xFFF9E2AF),
+                      duration: const Duration(seconds: 10),
+                      showCloseIcon: true,
+                    ),
+                  );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
