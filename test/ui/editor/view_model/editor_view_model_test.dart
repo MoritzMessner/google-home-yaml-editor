@@ -84,6 +84,35 @@ automations:
       expect(restored, ['1min', '2min', '3min']);
     });
 
+    test('item ids follow their items', () {
+      final viewModel = EditorViewModel()
+        ..addAction(0, const DelayAction(duration: '1min'))
+        ..addAction(0, const DelayAction(duration: '2min'))
+        ..addAction(0, const DelayAction(duration: '3min'))
+        ..addStarter(0);
+      final [first, second, third] = viewModel.actionIds(0);
+
+      viewModel
+        ..moveAction(0, 0, 2)
+        ..removeAction(0, 0)
+        ..updateAction(0, 0, const DelayAction(duration: '4min'));
+
+      expect(viewModel.actionIds(0), [third, first]);
+      expect(viewModel.starterIds(0), hasLength(2));
+      expect({...viewModel.starterIds(0), first, third}, hasLength(4));
+    });
+
+    test('replacing the script bumps the revision and renews ids', () {
+      final viewModel = EditorViewModel();
+      final revision = viewModel.revision;
+      final starterIds = viewModel.starterIds(0);
+
+      viewModel.newScript();
+
+      expect(viewModel.revision, greaterThan(revision));
+      expect(viewModel.starterIds(0), isNot(starterIds));
+    });
+
     test('yamlOutput reflects metadata changes', () {
       final viewModel = EditorViewModel()..updateMetadataName('Movie: Night');
       expect(viewModel.yamlOutput, contains('name: "Movie: Night"'));
