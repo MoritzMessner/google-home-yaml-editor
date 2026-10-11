@@ -1,8 +1,6 @@
 import 'package:yaml/yaml.dart';
 
 import '../domain/models/automation.dart';
-import '../domain/models/condition.dart';
-import '../domain/models/starter.dart';
 
 /// Converts between AutomationScript and YAML format
 class YamlConverter {
@@ -14,8 +12,8 @@ class YamlConverter {
 
     // Metadata
     buffer.writeln('metadata:');
-    buffer.writeln('  name: ${script.metadata.name}');
-    buffer.writeln('  description: ${script.metadata.description}');
+    buffer.writeln('  name: ${_quote(script.metadata.name)}');
+    buffer.writeln('  description: ${_quote(script.metadata.description)}');
     buffer.writeln();
 
     // Automations
@@ -40,8 +38,14 @@ class YamlConverter {
     return buffer.toString();
   }
 
-  /// Parse YAML string to AutomationScript
-  static AutomationScript? fromYaml(String yaml) {
+  /// Parse YAML string to AutomationScript.
+  ///
+  /// Returns `null` if [yaml] cannot be parsed. [onError] receives the
+  /// underlying error so callers can show a meaningful message.
+  static AutomationScript? fromYaml(
+    String yaml, {
+    void Function(Object error)? onError,
+  }) {
     try {
       final doc = loadYaml(yaml) as YamlMap?;
       if (doc == null) return null;
@@ -106,6 +110,7 @@ class YamlConverter {
         automations: automations,
       );
     } catch (e) {
+      onError?.call(e);
       return null;
     }
   }
@@ -125,7 +130,7 @@ class YamlConverter {
       // Time events
       case TimeScheduleStarter(:final at, :final weekdays):
         buffer.writeln('      - type: time.schedule');
-        buffer.writeln('        at: $at');
+        buffer.writeln('        at: ${_quote(at)}');
         if (weekdays != null && weekdays.isNotEmpty) {
           buffer.writeln('        weekdays:');
           for (final day in weekdays) {
@@ -249,8 +254,12 @@ class YamlConverter {
     switch (condition) {
       case TimeBetweenCondition(:final after, :final before, :final weekdays):
         buffer.writeln('${prefix}type: time.between');
-        if (after != null) buffer.writeln('${prefix}after: $after');
-        if (before != null) buffer.writeln('${prefix}before: $before');
+        if (after != null) {
+          buffer.writeln('${prefix}after: ${_quote(after)}');
+        }
+        if (before != null) {
+          buffer.writeln('${prefix}before: ${_quote(before)}');
+        }
         if (weekdays != null && weekdays.isNotEmpty) {
           buffer.writeln('${prefix}weekdays:');
           for (final day in weekdays) {
@@ -389,7 +398,7 @@ class YamlConverter {
     switch (action) {
       case DelayAction(:final duration):
         buffer.writeln('      - type: time.delay');
-        buffer.writeln('        for: $duration');
+        buffer.writeln('        for: ${_quote(duration)}');
 
       case BroadcastAction(:final message):
         buffer.writeln('      - type: assistant.command.Broadcast');
@@ -684,12 +693,12 @@ class YamlConverter {
       case TimerStartAction(:final devices, :final duration):
         buffer.writeln('      - type: device.command.TimerStart');
         _writeDevices(buffer, devices);
-        buffer.writeln('        duration: $duration');
+        buffer.writeln('        duration: ${_quote(duration)}');
 
       case TimerAdjustAction(:final devices, :final duration):
         buffer.writeln('      - type: device.command.TimerAdjust');
         _writeDevices(buffer, devices);
-        buffer.writeln('        duration: $duration');
+        buffer.writeln('        duration: ${_quote(duration)}');
 
       case TimerPauseAction(:final devices):
         buffer.writeln('      - type: device.command.TimerPause');
@@ -707,28 +716,28 @@ class YamlConverter {
         buffer.writeln('      - type: device.command.LightEffectColorLoop');
         _writeDevices(buffer, devices);
         if (duration != null) {
-          buffer.writeln('        duration: $duration');
+          buffer.writeln('        duration: ${_quote(duration)}');
         }
 
       case LightEffectPulseAction(:final devices, :final duration):
         buffer.writeln('      - type: device.command.LightEffectPulse');
         _writeDevices(buffer, devices);
         if (duration != null) {
-          buffer.writeln('        duration: $duration');
+          buffer.writeln('        duration: ${_quote(duration)}');
         }
 
       case LightEffectSleepAction(:final devices, :final duration):
         buffer.writeln('      - type: device.command.LightEffectSleep');
         _writeDevices(buffer, devices);
         if (duration != null) {
-          buffer.writeln('        duration: $duration');
+          buffer.writeln('        duration: ${_quote(duration)}');
         }
 
       case LightEffectWakeAction(:final devices, :final duration):
         buffer.writeln('      - type: device.command.LightEffectWake');
         _writeDevices(buffer, devices);
         if (duration != null) {
-          buffer.writeln('        duration: $duration');
+          buffer.writeln('        duration: ${_quote(duration)}');
         }
 
       case StopLightEffectAction(:final devices):
@@ -830,20 +839,54 @@ class YamlConverter {
     }
   }
 
+  /// Scalars that YAML 1.1 or 1.2 would read as bool or null.
+  static const _reservedScalars = {
+    'true',
+    'false',
+    'yes',
+    'no',
+    'on',
+    'off',
+    'y',
+    'n',
+    'null',
+    '~',
+  };
+
+  /// Characters that start a non-plain YAML token when used first.
+  static const _indicatorChars = '-?:,[]{}#&*!|>\'"%@`';
+
+  /// Returns [value] as a YAML scalar that always parses back to the
+  /// same string. Plain style is used when safe, double quotes otherwise.
   static String _quote(String value) {
-    if (value.isEmpty) return '""';
-    if (value.contains(':') ||
-        value.contains('#') ||
-        value.contains("'") ||
-        value.contains('"') ||
-        value.contains('\n') ||
-        value.startsWith(' ') ||
-        value.endsWith(' ')) {
-      // Use double quotes and escape internal double quotes
-      final escaped = value.replaceAll('"', '\\"');
+    if (_needsQuotes(value)) {
+      final escaped = value
+          .replaceAll(r'\', r'\\')
+          .replaceAll('"', r'\"')
+          .replaceAll('\n', r'\n')
+          .replaceAll('\r', r'\r')
+          .replaceAll('\t', r'\t')
+          .replaceAllMapped(
+            RegExp(r'[\x00-\x1F\x7F]'),
+            (m) =>
+                '\\x${m[0]!.codeUnitAt(0).toRadixString(16).padLeft(2, '0')}',
+          );
       return '"$escaped"';
     }
     return value;
+  }
+
+  static bool _needsQuotes(String value) {
+    if (value.isEmpty) return true;
+    if (value.trim() != value) return true;
+    if (_indicatorChars.contains(value[0])) return true;
+    if (value.contains(':') || value.contains('#')) return true;
+    if (value.contains(RegExp(r'[\x00-\x1F\x7F]'))) return true;
+    if (_reservedScalars.contains(value.toLowerCase())) return true;
+    // Numbers, dates, .inf/.nan and similar would not stay strings.
+    if (value.startsWith(RegExp(r'[-+]?\.?\d'))) return true;
+    if (value.startsWith('.')) return true;
+    return false;
   }
 
   static String _formatValue(dynamic value) {
