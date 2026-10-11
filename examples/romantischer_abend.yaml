@@ -22,7 +22,7 @@ automations:
       - type: device.command.OnOff
         devices:
           - Wohnzimmer Lights - Wohnzimmer
-          - Wohnzimmerlicht - Wohnzimmer
+          - Wohzimmerlicht - Wohnzimmer
           - Küche Lights - Küche
         on: false
 
@@ -46,7 +46,7 @@ automations:
           - Sofa - Wohnzimmer
           - Fensterlampe - Wohnzimmer
         color:
-          temperature: 2200K
+          temperature: 2202K
 
       # Esstisch-Beleuchtung für Dinner
       - type: device.command.OnOff

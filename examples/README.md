@@ -6,7 +6,7 @@ Diese Beispiele nutzen **deine echten Gerätenamen** und zeigen komplexe Automat
 
 ### 🌅 [morgen_routine.yaml](morgen_routine.yaml)
 **Komplexität:** Mittel  
-**Verwendete Geräte:** Schlafzimmer (Links, Rechts, Bett), Flur (Flurlicht, Licht 11), Wohnzimmer (Fensterlampe, Schreibtisch, Luftreiniger)
+**Verwendete Geräte:** Schlafzimmer (Links, Rechts, Bett), Flur (Flurlicht), Wohnzimmer (Fensterlampe, Schreibtisch, Luftreiniger)
 
 **Features:**
 - Zeitbasierte Auslöser mit Wochentag-Filterung (Mo-Fr vs. Wochenende)
@@ -37,7 +37,7 @@ Diese Beispiele nutzen **deine echten Gerätenamen** und zeigen komplexe Automat
 
 ### 💡 [abwesenheit_energiesparen.yaml](abwesenheit_energiesparen.yaml)
 **Komplexität:** Hoch  
-**Verwendete Geräte:** **Alle 24 Geräte** (Wohnzimmer, Schlafzimmer, Küche, Flur, TV, S8 Staubsauger)
+**Verwendete Geräte:** **Fast alle Geräte** (Wohnzimmer, Schlafzimmer, Küche, Flur, TV, S8 Staubsauger)
 
 **Features:**
 - **Anwesenheitserkennung** (`home.state.HomePresence` mit HOME/AWAY)
@@ -53,7 +53,7 @@ Diese Beispiele nutzen **deine echten Gerätenamen** und zeigen komplexe Automat
 
 ### 🌙 [nachtmodus.yaml](nachtmodus.yaml)
 **Komplexität:** Mittel  
-**Verwendete Geräte:** Wohnzimmer (Lava), Schlafzimmer (Bett), Flur (Flurlicht, Licht 11), Sensor 1, Luftreiniger
+**Verwendete Geräte:** Wohnzimmer (Lava), Schlafzimmer (Bett), Flur (Flurlicht), Sensor 1, Luftreiniger
 
 **Features:**
 - Sprachaktivierung ("Nachtmodus", "Guten Morgen")
@@ -134,35 +134,38 @@ automations:
 - **Gerätenamen** müssen mit Raum-Suffix sein: `Lava - Wohnzimmer`
 - **`Lava - Wohnzimmer`** unterstützt nur On/Off (keine Helligkeit)
 - **`Luftreiniger - Wohnzimmer`** ist an Smart Plug (nur On/Off, kein SetFanSpeed)
+- **Farbtemperatur**: einige Lampen akzeptieren nur `2202K` bis `4000K`
 - **Farben** mit Namen: `"warm white"`, `"daylight"`, `"red"`
 
 ---
 
 ## 🏠 Deine Geräte-Übersicht
 
-### Wohnzimmer (9 Geräte)
+### Wohnzimmer (11 Geräte)
 - `Wohnzimmer - Wohnzimmer` (Speaker)
 - `Wohnzimmer Lights - Wohnzimmer` (Gruppe)
-- `Wohzimmerlicht - Wohnzimmer` (Licht mit Helligkeit)
+- `Wohzimmerlicht - Wohnzimmer` (Licht mit Helligkeit; der Gerätename hat diesen Tippfehler)
+- `Licht 11 - Wohnzimmer`
 - `Sofa - Wohnzimmer`, `Fensterlampe - Wohnzimmer`, `Schreibtisch - Wohnzimmer`, `Klavier - Wohnzimmer` (Lichter mit Helligkeit)
 - `Lava - Wohnzimmer` (**nur On/Off**)
 - `Luftreiniger - Wohnzimmer` (Smart Plug, nur On/Off)
 - `Samsung The Frame 50 - Wohnzimmer` (TV)
 - `Bildschirm - Wohnzimmer` (Display)
+- `Ventilator - Wohnzimmer`
 
 ### Schlafzimmer (4 Geräte)
 - `Schlafzimmer Lights - Schlafzimmer` (Gruppe)
 - `Bett - Schlafzimmer`, `Links - Schlafzimmer`, `Rechts - Schlafzimmer`
 
-### Küche (5 Geräte)
+### Küche (6 Geräte)
 - `Küche Lights - Küche` (Gruppe)
 - `Esstisch - Küche`, `Komode - Küche` (Lichter mit Helligkeit)
 - `Küchenlautsprecher - Küche` (Speaker)
 - `S8 - Küche` (Staubsauger)
+- `Esszimmer Fenster - Küche`
 
-### Flur (4 Geräte)
-- `Flur Lights - Flur` (Gruppe)
-- `Flurlicht - Flur`, `Licht 11 - Flur`
+### Flur (2 Geräte)
+- `Flurlicht - Flur`
 - `Sensor 1 - Flur` (Bewegungssensor)
 
 ---
