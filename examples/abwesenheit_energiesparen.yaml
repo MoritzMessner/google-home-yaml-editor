@@ -16,14 +16,14 @@ automations:
       # Alle Wohnzimmer-Lichter aus
       - type: device.command.OnOff
         devices:
-          - Wohnzimmer - Wohnzimmer
           - Wohnzimmer Lights - Wohnzimmer
-          - Wohnzimmerlicht - Wohnzimmer
+          - Wohzimmerlicht - Wohnzimmer
           - Sofa - Wohnzimmer
           - Fensterlampe - Wohnzimmer
           - Schreibtisch - Wohnzimmer
           - Klavier - Wohnzimmer
           - Lava - Wohnzimmer
+          - Licht 11 - Wohnzimmer
         on: false
 
       # Alle Schlafzimmer-Lichter aus
@@ -46,9 +46,7 @@ automations:
       # Alle Flur-Lichter aus
       - type: device.command.OnOff
         devices:
-          - Flur Lights - Flur
           - Flurlicht - Flur
-          - Licht 11 - Flur
         on: false
 
       # TV und Bildschirm ausschalten

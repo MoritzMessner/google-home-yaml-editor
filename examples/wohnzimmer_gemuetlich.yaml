@@ -23,7 +23,7 @@ automations:
         devices:
           - Wohzimmerlicht - Wohnzimmer
         color:
-          temperature: 2200K
+          temperature: 2202K
 
       - type: device.command.BrightnessAbsolute
         devices:
@@ -57,7 +57,7 @@ automations:
         devices:
           - Fensterlampe - Wohnzimmer
         color:
-          temperature: 2200K
+          temperature: 2202K
 
       - type: device.command.BrightnessAbsolute
         devices:
@@ -74,7 +74,7 @@ automations:
         devices:
           - Sofa - Wohnzimmer
         color:
-          temperature: 2200K
+          temperature: 2202K
 
       - type: device.command.BrightnessAbsolute
         devices:
@@ -91,7 +91,7 @@ automations:
         devices:
           - Schreibtisch - Wohnzimmer
         color:
-          temperature: 2200K
+          temperature: 2202K
 
       - type: device.command.BrightnessAbsolute
         devices:

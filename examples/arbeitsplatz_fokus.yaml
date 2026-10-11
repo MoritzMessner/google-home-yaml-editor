@@ -34,17 +34,17 @@ automations:
         devices:
           - Schreibtisch - Wohnzimmer
         color:
-          temperature: 5500K
+          temperature: 4000K
 
       # Wohnzimmer-Hauptlicht moderat
       - type: device.command.OnOff
         devices:
-          - Wohnzimmer - Wohnzimmer
+          - Wohzimmerlicht - Wohnzimmer
         on: true
 
       - type: device.command.BrightnessAbsolute
         devices:
-          - Wohnzimmerlicht - Wohnzimmer
+          - Wohzimmerlicht - Wohnzimmer
         brightness: 50
 
       # Ablenkende Lichter ausschalten

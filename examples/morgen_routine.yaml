@@ -46,13 +46,11 @@ automations:
       - type: device.command.OnOff
         devices:
           - Flurlicht - Flur
-          - Licht 11 - Flur
         on: true
 
       - type: device.command.BrightnessAbsolute
         devices:
           - Flurlicht - Flur
-          - Licht 11 - Flur
         brightness: 60
 
       # Wohnzimmer vorbereiten
