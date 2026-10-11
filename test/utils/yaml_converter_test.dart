@@ -234,6 +234,34 @@ automations:
       return warnings;
     }
 
+    test('keeps automation names', () {
+      const yaml = '''
+metadata:
+  name: T
+  description: ""
+automations:
+  - name: Movie Night an
+    starters:
+      - type: assistant.event.OkGoogle
+        eventData: query
+        is: Filmabend
+    actions: []
+  - starters:
+      - type: assistant.event.OkGoogle
+        eventData: query
+        is: Ende
+    actions: []
+''';
+      final script = YamlConverter.fromYaml(yaml)!;
+      expect(script.automations.map((a) => a.name), ['Movie Night an', null]);
+
+      final output = YamlConverter.toYaml(script);
+      expect(output, contains('  - name: Movie Night an\n    starters:\n'));
+      expect(output, contains('  - starters:\n'));
+      expect(YamlConverter.fromYaml(output)!.automations.first.name,
+          'Movie Night an');
+    });
+
     test('keeps the trait of generic device.state starters', () {
       const yaml = '''
 metadata:

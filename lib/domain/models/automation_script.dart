@@ -64,11 +64,14 @@ class Metadata {
 
 class Automation {
   const Automation({
+    this.name,
     required this.starters,
     required this.condition,
     required this.actions,
   });
 
+  /// Optional name shown in the Google Home app for this automation.
+  final String? name;
   final List<Starter> starters;
   final Condition? condition;
   final List<AutomationAction> actions;
@@ -80,6 +83,7 @@ class Automation {
     bool clearCondition = false,
   }) {
     return Automation(
+      name: name,
       starters: starters ?? this.starters,
       condition: clearCondition ? null : (condition ?? this.condition),
       actions: actions ?? this.actions,

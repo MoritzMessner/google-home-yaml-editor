@@ -19,7 +19,12 @@ class YamlConverter {
     // Automations
     buffer.writeln('automations:');
     for (final automation in script.automations) {
-      buffer.writeln('  - starters:');
+      if (automation.name case final name? when name.isNotEmpty) {
+        buffer.writeln('  - name: ${_quote(name)}');
+        buffer.writeln('    starters:');
+      } else {
+        buffer.writeln('  - starters:');
+      }
       for (final starter in automation.starters) {
         _writeStarter(buffer, starter);
       }
@@ -134,6 +139,7 @@ class YamlConverter {
           }
 
           automations.add(Automation(
+            name: automationYaml['name']?.toString(),
             starters: starters,
             condition: condition,
             actions: actions,
