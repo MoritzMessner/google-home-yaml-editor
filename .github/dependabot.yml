@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: pub
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly
+    groups:
+      pub-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ['*']
