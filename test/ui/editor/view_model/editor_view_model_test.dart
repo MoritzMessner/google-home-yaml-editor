@@ -50,6 +50,29 @@ automations:
       expect(viewModel.parseError, contains('FUNDAY'));
     });
 
+    test('collects warnings for unsupported content', () {
+      final viewModel = EditorViewModel();
+      final success = viewModel.importYaml('''
+metadata:
+  name: Test
+  description: ""
+automations:
+  - starters:
+      - type: assistant.event.OkGoogle
+        eventData: query
+        is: Hi
+    actions:
+      - type: device.command.SomethingNew
+        devices: [Lamp]
+''');
+
+      expect(success, isTrue);
+      expect(viewModel.importWarnings, [contains('SomethingNew')]);
+
+      viewModel.newScript();
+      expect(viewModel.importWarnings, isEmpty);
+    });
+
     test('keeps the previous script on failure', () {
       final viewModel = EditorViewModel()..updateMetadataName('Keep me');
       viewModel.importYaml('metadata: [unclosed');

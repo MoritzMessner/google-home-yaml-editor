@@ -47,6 +47,10 @@ class EditorViewModel extends ChangeNotifier {
   String? _parseError;
   String? get parseError => _parseError;
 
+  /// Parts of the last imported script that were dropped or ignored.
+  List<String> _importWarnings = const [];
+  List<String> get importWarnings => _importWarnings;
+
   /// Get the YAML representation of the current script
   String get yamlOutput => YamlConverter.toYaml(_script);
 
@@ -174,10 +178,16 @@ class EditorViewModel extends ChangeNotifier {
 
   bool importYaml(String yaml) {
     Object? error;
-    final parsed = YamlConverter.fromYaml(yaml, onError: (e) => error = e);
+    final warnings = <String>[];
+    final parsed = YamlConverter.fromYaml(
+      yaml,
+      onError: (e) => error = e,
+      onWarning: warnings.add,
+    );
     if (parsed != null) {
       _replaceScript(parsed);
       _parseError = null;
+      _importWarnings = List.unmodifiable(warnings);
       notifyListeners();
       return true;
     } else {
@@ -209,6 +219,7 @@ class EditorViewModel extends ChangeNotifier {
   void newScript() {
     _replaceScript(AutomationScript.empty());
     _parseError = null;
+    _importWarnings = const [];
     notifyListeners();
   }
 }

@@ -1096,12 +1096,28 @@ class ConditionCard extends StatelessWidget {
     return Column(
       children: [
         TextFormField(
+          initialValue: c.type,
+          decoration: const InputDecoration(
+            labelText: 'Type',
+            hintText: 'e.g., device.state.OnOff',
+            isDense: true,
+          ),
+          onChanged: (v) => onChanged(DeviceStateCondition(
+            type: v,
+            device: c.device,
+            state: c.state,
+            is_: c.is_,
+          )),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
           initialValue: c.device,
           decoration: const InputDecoration(
             labelText: 'Device',
             isDense: true,
           ),
           onChanged: (v) => onChanged(DeviceStateCondition(
+            type: c.type,
             device: v,
             state: c.state,
             is_: c.is_,
@@ -1115,6 +1131,7 @@ class ConditionCard extends StatelessWidget {
             isDense: true,
           ),
           onChanged: (v) => onChanged(DeviceStateCondition(
+            type: c.type,
             device: c.device,
             state: v,
             is_: c.is_,
@@ -1128,6 +1145,7 @@ class ConditionCard extends StatelessWidget {
             isDense: true,
           ),
           onChanged: (v) => onChanged(DeviceStateCondition(
+            type: c.type,
             device: c.device,
             state: c.state,
             is_: parseStateValue(v),

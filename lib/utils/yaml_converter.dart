@@ -38,14 +38,39 @@ class YamlConverter {
     return buffer.toString();
   }
 
+  /// Comparison and timing fields the editor does not support. They are
+  /// ignored on import, so the user is warned about them.
+  static const _unsupportedFields = [
+    'isNot',
+    'greaterThan',
+    'greaterThanOrEqualTo',
+    'lessThan',
+    'lessThanOrEqualTo',
+    'for',
+    'suppressFor',
+  ];
+
   /// Parse YAML string to AutomationScript.
   ///
   /// Returns `null` if [yaml] cannot be parsed. [onError] receives the
   /// underlying error so callers can show a meaningful message.
+  /// [onWarning] receives a message for every part of the script that the
+  /// editor does not support and therefore dropped or ignored.
   static AutomationScript? fromYaml(
     String yaml, {
     void Function(Object error)? onError,
+    void Function(String warning)? onWarning,
   }) {
+    void warnUnsupportedFields(YamlMap item, String kind) {
+      final type = item['type'];
+      for (final field in _unsupportedFields) {
+        if (item.containsKey(field)) {
+          onWarning?.call('`$field` on $kind $type is not supported and was '
+              'ignored.');
+        }
+      }
+    }
+
     try {
       final doc = loadYaml(yaml) as YamlMap?;
       if (doc == null) return null;
@@ -67,7 +92,13 @@ class YamlConverter {
           if (startersYaml != null) {
             for (final starterYaml in startersYaml) {
               final starter = _parseStarter(starterYaml as YamlMap);
-              if (starter != null) starters.add(starter);
+              if (starter != null) {
+                starters.add(starter);
+                warnUnsupportedFields(starterYaml, 'starter');
+              } else {
+                onWarning?.call('Starter type ${starterYaml['type']} is not '
+                    'supported and was dropped.');
+              }
             }
           }
 
@@ -78,6 +109,14 @@ class YamlConverter {
           final conditionYaml = automationYaml['condition'] as YamlMap?;
           final condition =
               conditionYaml != null ? _parseCondition(conditionYaml) : null;
+          if (conditionYaml != null) {
+            if (condition == null) {
+              onWarning?.call('Condition type ${conditionYaml['type']} is '
+                  'not supported and was dropped.');
+            } else {
+              warnUnsupportedFields(conditionYaml, 'condition');
+            }
+          }
 
           final actionsYaml = automationYaml['actions'] as YamlList?;
           final actions = <AutomationAction>[];
@@ -85,7 +124,12 @@ class YamlConverter {
           if (actionsYaml != null) {
             for (final actionYaml in actionsYaml) {
               final action = _parseAction(actionYaml as YamlMap);
-              if (action != null) actions.add(action);
+              if (action != null) {
+                actions.add(action);
+              } else {
+                onWarning?.call('Action type ${actionYaml['type']} is not '
+                    'supported and was dropped.');
+              }
             }
           }
 
@@ -240,8 +284,13 @@ class YamlConverter {
         buffer.writeln('        state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
 
-      case DeviceStateStarter(:final device, :final state, :final is_):
-        buffer.writeln('      - type: device.state');
+      case DeviceStateStarter(
+          :final type,
+          :final device,
+          :final state,
+          :final is_
+        ):
+        buffer.writeln('      - type: $type');
         buffer.writeln('        device: ${_quote(device)}');
         buffer.writeln('        state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('        is: ${_formatValue(is_)}');
@@ -386,8 +435,13 @@ class YamlConverter {
         buffer.writeln('${prefix}state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
 
-      case DeviceStateCondition(:final device, :final state, :final is_):
-        buffer.writeln('${prefix}type: device.state');
+      case DeviceStateCondition(
+          :final type,
+          :final device,
+          :final state,
+          :final is_
+        ):
+        buffer.writeln('${prefix}type: $type');
         buffer.writeln('${prefix}device: ${_quote(device)}');
         buffer.writeln('${prefix}state: ${_quote(state)}');
         if (is_ != null) buffer.writeln('${prefix}is: ${_formatValue(is_)}');
@@ -1032,7 +1086,8 @@ class YamlConverter {
       default:
         // Generic device state starter
         if (type?.startsWith('device.state') == true) {
-          return DeviceStateStarter(device: device, state: state, is_: isValue);
+          return DeviceStateStarter(
+              type: type!, device: device, state: state, is_: isValue);
         }
         return null;
     }
@@ -1183,7 +1238,7 @@ class YamlConverter {
         // Generic device state condition
         if (type?.startsWith('device.state') == true) {
           return DeviceStateCondition(
-              device: device, state: state, is_: isValue);
+              type: type!, device: device, state: state, is_: isValue);
         }
         return null;
     }

@@ -223,6 +223,113 @@ automations:
     });
   });
 
+  group('YamlConverter unsupported content', () {
+    List<String> warningsFor(String automation) {
+      final warnings = <String>[];
+      final script = YamlConverter.fromYaml(
+        'metadata:\n  name: T\n  description: ""\nautomations:\n$automation',
+        onWarning: warnings.add,
+      );
+      expect(script, isNotNull);
+      return warnings;
+    }
+
+    test('keeps the trait of generic device.state starters', () {
+      const yaml = '''
+metadata:
+  name: T
+  description: ""
+automations:
+  - starters:
+      - type: device.state.MediaState
+        device: TV
+        state: playbackState
+        is: PLAYING
+    condition:
+      type: device.state.Volume
+      device: Speaker
+      state: currentVolume
+      is: 10
+    actions: []
+''';
+      final output = YamlConverter.toYaml(YamlConverter.fromYaml(yaml)!);
+      expect(output, contains('type: device.state.MediaState'));
+      expect(output, contains('type: device.state.Volume'));
+    });
+
+    test('warns about dropped actions', () {
+      final warnings = warningsFor('''
+  - starters:
+      - type: assistant.event.OkGoogle
+        eventData: query
+        is: Hi
+    actions:
+      - type: device.command.SomethingNew
+        devices: [Lamp]
+''');
+      expect(warnings, [contains('device.command.SomethingNew')]);
+    });
+
+    test('warns about dropped starters', () {
+      final warnings = warningsFor('''
+  - starters:
+      - type: device.event.SomethingNew
+        device: Doorbell
+    actions: []
+''');
+      expect(warnings, [contains('device.event.SomethingNew')]);
+    });
+
+    test('warns about logical conditions', () {
+      final warnings = warningsFor('''
+  - starters:
+      - type: assistant.event.OkGoogle
+        eventData: query
+        is: Hi
+    condition:
+      type: and
+      conditions:
+        - type: time.between
+          after: sunset
+    actions: []
+''');
+      expect(warnings, [contains('and')]);
+    });
+
+    test('warns about unsupported comparison fields', () {
+      final warnings = warningsFor('''
+  - starters:
+      - type: assistant.event.OkGoogle
+        eventData: query
+        is: Hi
+        suppressFor: 1hour
+    condition:
+      type: device.state.Volume
+      device: Speaker
+      state: currentVolume
+      greaterThan: 10
+    actions: []
+''');
+      expect(warnings, hasLength(2));
+      expect(warnings, contains(contains('suppressFor')));
+      expect(warnings, contains(contains('greaterThan')));
+    });
+
+    test('examples import without warnings', () {
+      for (final file in Directory('examples')
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.yaml'))) {
+        final warnings = <String>[];
+        YamlConverter.fromYaml(
+          file.readAsStringSync(),
+          onWarning: warnings.add,
+        );
+        expect(warnings, isEmpty, reason: file.path);
+      }
+    });
+  });
+
   group('YamlConverter.fromYaml', () {
     test('reports the underlying error through onError', () {
       Object? error;
