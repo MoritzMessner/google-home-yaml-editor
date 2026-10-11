@@ -1,5 +1,6 @@
 /// Barrel file for automation models
 /// Re-exports all automation-related types for backward compatibility
+library;
 
 export 'action.dart';
 export 'automation_script.dart';

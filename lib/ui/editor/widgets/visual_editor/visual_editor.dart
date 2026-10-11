@@ -148,7 +148,7 @@ class _AutomationSection extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: automation.actions.length,
-            onReorder: (oldIndex, newIndex) =>
+            onReorderItem: (oldIndex, newIndex) =>
                 viewModel.moveAction(automationIndex, oldIndex, newIndex),
             itemBuilder: (context, index) {
               return Padding(

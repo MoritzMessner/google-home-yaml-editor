@@ -21,6 +21,3 @@ class GoogleHomeScriptEditorApp extends StatelessWidget {
     );
   }
 }
-
-
-

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../../domain/models/automation.dart';
 import '../../../utils/yaml_converter.dart';
@@ -120,11 +121,11 @@ class EditorViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Moves the action at [oldIndex] so that it ends up at [newIndex].
   void moveAction(int automationIndex, int oldIndex, int newIndex) {
     final automations = List<Automation>.from(_script.automations);
     final automation = automations[automationIndex];
     final actions = List<AutomationAction>.from(automation.actions);
-    if (newIndex > oldIndex) newIndex--;
     final action = actions.removeAt(oldIndex);
     actions.insert(newIndex, action);
     automations[automationIndex] = automation.copyWith(actions: actions);
@@ -135,17 +136,30 @@ class EditorViewModel extends ChangeNotifier {
   // --- Import YAML ---
 
   bool importYaml(String yaml) {
-    final parsed = YamlConverter.fromYaml(yaml);
+    Object? error;
+    final parsed = YamlConverter.fromYaml(yaml, onError: (e) => error = e);
     if (parsed != null) {
       _script = parsed;
       _parseError = null;
       notifyListeners();
       return true;
     } else {
-      _parseError = 'Failed to parse YAML. Please check the format.';
+      _parseError = _describeParseError(error);
       notifyListeners();
       return false;
     }
+  }
+
+  static String _describeParseError(Object? error) {
+    const prefix = 'Failed to parse YAML';
+    return switch (error) {
+      null => '$prefix. Please check the format.',
+      YamlException(:final message, :final span?) =>
+        '$prefix (line ${span.start.line + 1}): $message',
+      YamlException(:final message) => '$prefix: $message',
+      ArgumentError(:final message) => '$prefix: $message',
+      _ => '$prefix. Please check the format.',
+    };
   }
 
   void clearParseError() {
@@ -161,6 +175,3 @@ class EditorViewModel extends ChangeNotifier {
     notifyListeners();
   }
 }
-
-
-
