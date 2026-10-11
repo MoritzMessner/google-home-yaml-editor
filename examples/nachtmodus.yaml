@@ -9,7 +9,8 @@ metadata:
 automations:
   - starters:
       - type: assistant.event.OkGoogle
-        query: "Nachtmodus"
+        eventData: query
+        is: "Nachtmodus"
 
     condition:
       type: time.between

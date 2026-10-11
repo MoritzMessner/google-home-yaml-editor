@@ -128,7 +128,37 @@ void main() {
         final second = YamlConverter.toYaml(YamlConverter.fromYaml(first)!);
         expect(second, first);
       });
+
+      test('keeps every field of ${file.path}', () {
+        final source = file.readAsStringSync();
+        final output = YamlConverter.toYaml(YamlConverter.fromYaml(source)!);
+        expect(_normalize(loadYaml(output)), _normalize(loadYaml(source)));
+      });
     }
+  });
+
+  group('YamlConverter colors', () {
+    test('writes color temperature in Kelvin notation', () {
+      const script = AutomationScript(
+        metadata: Metadata(name: 'Test', description: ''),
+        automations: [
+          Automation(
+            starters: [OkGoogleStarter(eventData: 'Warm')],
+            condition: null,
+            actions: [
+              ColorAbsoluteAction(devices: ['Lamp'], temperature: 2700),
+            ],
+          ),
+        ],
+      );
+
+      final yaml = YamlConverter.toYaml(script);
+      expect(yaml, contains('temperature: 2700K'));
+
+      final action = _roundTrip(script).automations.single.actions.single
+          as ColorAbsoluteAction;
+      expect(action.temperature, 2700);
+    });
   });
 
   group('YamlConverter times and weekdays', () {
@@ -204,6 +234,17 @@ automations:
     });
   });
 }
+
+/// Converts parsed YAML to plain maps and lists with string scalars, so
+/// that `80` and `"80"` compare equal.
+Object? _normalize(Object? node) => switch (node) {
+      Map() => {
+          for (final e in node.entries) e.key.toString(): _normalize(e.value),
+        },
+      List() => [for (final e in node) _normalize(e)],
+      null => null,
+      _ => node.toString(),
+    };
 
 String _describe(String value) =>
     '"${value.replaceAll('\n', r'\n').replaceAll('\t', r'\t')}"';

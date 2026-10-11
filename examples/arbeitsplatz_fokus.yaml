@@ -9,7 +9,8 @@ metadata:
 automations:
   - starters:
       - type: assistant.event.OkGoogle
-        query: "Fokus-Modus"
+        eventData: query
+        is: "Fokus-Modus"
 
     condition:
       type: time.between
@@ -33,7 +34,7 @@ automations:
         devices:
           - Schreibtisch - Wohnzimmer
         color:
-          temperature: 5500
+          temperature: 5500K
 
       # Wohnzimmer-Hauptlicht moderat
       - type: device.command.OnOff

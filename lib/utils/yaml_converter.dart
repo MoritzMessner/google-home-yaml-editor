@@ -452,7 +452,7 @@ class YamlConverter {
           buffer.writeln('          spectrumRGB: $spectrumRGB');
         }
         if (temperature != null) {
-          buffer.writeln('          temperature: $temperature');
+          buffer.writeln('          temperature: ${temperature}K');
         }
 
       case SetVolumeAction(:final devices, :final volumeLevel):

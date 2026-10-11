@@ -9,7 +9,8 @@ metadata:
 automations:
   - starters:
       - type: assistant.event.OkGoogle
-        query: "Filmabend"
+        eventData: query
+        is: "Filmabend"
 
     condition:
       type: time.between
