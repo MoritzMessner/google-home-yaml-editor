@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../domain/models/condition.dart';
+import '../../../../utils/state_value.dart';
 import '../../../core/themes/app_theme.dart';
 import 'weekday_selector.dart';
 
@@ -731,7 +732,7 @@ class ConditionCard extends StatelessWidget {
           onChanged: (v) => onChanged(HumiditySettingCondition(
             device: c.device,
             state: c.state,
-            is_: v, // Kept dynamic as per model, likely int/double/string
+            is_: parseStateValue(v),
           )),
         ),
       ],
@@ -776,7 +777,7 @@ class ConditionCard extends StatelessWidget {
           onChanged: (v) => onChanged(FillCondition(
             device: c.device,
             state: c.state,
-            is_: v,
+            is_: parseStateValue(v),
           )),
         ),
       ],
@@ -987,7 +988,7 @@ class ConditionCard extends StatelessWidget {
           onChanged: (v) => onChanged(TimerCondition(
             device: c.device,
             state: c.state,
-            is_: v,
+            is_: parseStateValue(v),
           )),
         ),
       ],
@@ -1084,7 +1085,7 @@ class ConditionCard extends StatelessWidget {
           onChanged: (v) => onChanged(SensorStateCondition(
             device: c.device,
             state: c.state,
-            is_: v,
+            is_: parseStateValue(v),
           )),
         ),
       ],
@@ -1129,7 +1130,7 @@ class ConditionCard extends StatelessWidget {
           onChanged: (v) => onChanged(DeviceStateCondition(
             device: c.device,
             state: c.state,
-            is_: v,
+            is_: parseStateValue(v),
           )),
         ),
       ],

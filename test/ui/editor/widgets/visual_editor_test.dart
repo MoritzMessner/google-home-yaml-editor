@@ -93,6 +93,26 @@ automations:
     expect(texts, isNot(contains('old query')));
   });
 
+  testWidgets('numbers and booleans typed as state values stay typed',
+      (tester) async {
+    final viewModel = EditorViewModel()
+      ..updateStarter(
+        0,
+        0,
+        const DeviceStateStarter(device: 'Thermostat', state: 'temp', is_: ''),
+      );
+    await _pumpEditor(tester, viewModel);
+
+    final valueField = find.widgetWithText(TextFormField, 'Value');
+    await tester.enterText(valueField, '21');
+    await tester.pump();
+    expect(viewModel.yamlOutput, contains('is: 21\n'));
+
+    await tester.enterText(valueField, 'true');
+    await tester.pump();
+    expect(viewModel.yamlOutput, contains('is: true\n'));
+  });
+
   testWidgets('typing keeps focus on the edited field', (tester) async {
     final viewModel = EditorViewModel()
       ..addAction(0, const DelayAction(duration: '1min'));
